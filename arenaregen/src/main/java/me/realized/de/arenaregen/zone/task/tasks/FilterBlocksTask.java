@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+import java.util.logging.Logger;
+
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.util.BlockInfo;
 import me.realized.de.arenaregen.util.Callback;
@@ -20,8 +22,8 @@ public class FilterBlocksTask extends Task {
 
     private final Set<Position> changedBlocks;
 
-    public FilterBlocksTask(final ArenaRegen extension, final Zone zone, final Callback onDone, final Set<Position> changedBlocks) {
-        super(extension, zone, onDone);
+    public FilterBlocksTask(Logger logger, final ArenaRegen extension, final Zone zone, final Callback onDone, final Set<Position> changedBlocks) {
+        super(logger, extension, zone, onDone);
         this.changedBlocks = changedBlocks;
     }
 
@@ -61,6 +63,7 @@ public class FilterBlocksTask extends Task {
             iterator.remove();
         }
 
-        zone.startSyncTaskTimer(new ResetBlocksTask(extension, zone, onDone, changes));
+        this.logger.info("Starting to block reset task for zone " + this.zone.getName());
+        zone.startSyncTaskTimer(new ResetBlocksTask(logger, extension, zone, onDone, changes));
     }
 }

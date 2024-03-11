@@ -9,14 +9,16 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
+import java.util.logging.Logger;
+
 public class RelightBlocksTask extends Task {
     
     private final Location min, max;
 
     private int x;
 
-    public RelightBlocksTask(final ArenaRegen extension, final Zone zone, final Callback onDone) {
-        super(extension, zone, onDone);
+    public RelightBlocksTask(Logger logger, final ArenaRegen extension, final Zone zone, final Callback onDone) {
+        super(logger, extension, zone, onDone);
         this.min = zone.getMin();
         this.max = zone.getMax();
         this.x = min.getBlockX();
@@ -40,7 +42,8 @@ public class RelightBlocksTask extends Task {
 
         if (x > max.getBlockX()) {
             cancel();
-            zone.startSyncTaskTimer(new ChunkRefreshTask(extension, zone, onDone));
+            this.logger.info("Starting to chunk refresh task for zone " + this.zone.getName());
+            zone.startSyncTaskTimer(new ChunkRefreshTask(logger, extension, zone, onDone));
         }
     }
 }

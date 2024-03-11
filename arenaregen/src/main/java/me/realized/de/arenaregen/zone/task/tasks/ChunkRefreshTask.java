@@ -2,6 +2,8 @@ package me.realized.de.arenaregen.zone.task.tasks;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Logger;
+
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.util.Callback;
 import me.realized.de.arenaregen.util.ChunkLoc;
@@ -13,8 +15,8 @@ public class ChunkRefreshTask extends Task {
 
     private final Queue<ChunkLoc> chunks;
 
-    public ChunkRefreshTask(final ArenaRegen extension, final Zone zone, final Callback onDone) {
-        super(extension, zone, onDone);
+    public ChunkRefreshTask(Logger logger, final ArenaRegen extension, final Zone zone, final Callback onDone) {
+        super(logger, extension, zone, onDone);
         this.chunks = new LinkedList<>(zone.getChunks());
     }
 

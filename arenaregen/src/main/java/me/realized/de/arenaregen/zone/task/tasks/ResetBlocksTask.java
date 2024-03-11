@@ -1,6 +1,8 @@
 package me.realized.de.arenaregen.zone.task.tasks;
 
 import java.util.Queue;
+import java.util.logging.Logger;
+
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.nms.fallback.NMSHandler;
 import me.realized.de.arenaregen.util.BlockInfo;
@@ -14,8 +16,8 @@ public class ResetBlocksTask extends Task {
     
     private final Queue<Pair<Position, BlockInfo>> changed;
 
-    public ResetBlocksTask(final ArenaRegen extension, final Zone zone, final Callback onDone, final Queue<Pair<Position, BlockInfo>> changed) {
-        super(extension, zone, onDone);
+    public ResetBlocksTask(Logger logger, final ArenaRegen extension, final Zone zone, final Callback onDone, final Queue<Pair<Position, BlockInfo>> changed) {
+        super(logger, extension, zone, onDone);
         this.changed = changed;
     }
 
@@ -49,6 +51,7 @@ public class ResetBlocksTask extends Task {
             return;
         }
 
-        zone.startSyncTaskTimer(new RelightBlocksTask(extension, zone, onDone));
+        this.logger.info("Starting to block relight task for zone " + this.zone.getName());
+        zone.startSyncTaskTimer(new RelightBlocksTask(logger, extension, zone, onDone));
     }
 }

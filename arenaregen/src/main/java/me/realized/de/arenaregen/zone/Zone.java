@@ -1,39 +1,24 @@
 package me.realized.de.arenaregen.zone;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import lombok.Getter;
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.config.Config;
 import me.realized.de.arenaregen.nms.NMS;
-import me.realized.de.arenaregen.util.BlockInfo;
-import me.realized.de.arenaregen.util.BlockUtil;
-import me.realized.de.arenaregen.util.Callback;
-import me.realized.de.arenaregen.util.ChunkLoc;
-import me.realized.de.arenaregen.util.Position;
+import me.realized.de.arenaregen.util.*;
 import me.realized.de.arenaregen.zone.task.Task;
 import me.realized.de.arenaregen.zone.task.tasks.FilterBlocksTask;
 import me.realized.de.arenaregen.zone.task.tasks.ScanBlocksTask;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.arena.Arena;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.*;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class Zone {
 
@@ -49,6 +34,8 @@ public class Zone {
     @Getter
     private Location min, max;
 
+    private final Logger logger;
+
     @Getter
     private File file;
 
@@ -57,7 +44,7 @@ public class Zone {
 
     @Getter
     private volatile Map<Position, BlockInfo> blocks = new HashMap<>();
-    
+
     @Getter
     private final Set<ChunkLoc> chunks = new HashSet<>();
 
@@ -71,19 +58,20 @@ public class Zone {
         this.extension = extension;
         this.handler = extension.getHandler();
         this.config = extension.getConfiguration();
+        this.logger = extension.getApi().getLogger();
         this.arena = arena;
         this.file = new File(folder, arena.getName() + ".txt");
         this.min = new Location(
-            first.getWorld(),
-            Math.min(first.getBlockX(), second.getBlockX()),
-            Math.min(first.getBlockY(), second.getBlockY()),
-            Math.min(first.getBlockZ(), second.getBlockZ())
+                first.getWorld(),
+                Math.min(first.getBlockX(), second.getBlockX()),
+                Math.min(first.getBlockY(), second.getBlockY()),
+                Math.min(first.getBlockZ(), second.getBlockZ())
         );
         this.max = new Location(
-            first.getWorld(),
-            Math.max(first.getBlockX(), second.getBlockX()),
-            Math.max(first.getBlockY(), second.getBlockY()),
-            Math.max(first.getBlockZ(), second.getBlockZ())
+                first.getWorld(),
+                Math.max(first.getBlockX(), second.getBlockX()),
+                Math.max(first.getBlockY(), second.getBlockY()),
+                Math.max(first.getBlockZ(), second.getBlockZ())
         );
 
 
@@ -123,7 +111,7 @@ public class Zone {
                 writer.newLine();
             }
         } catch (IOException ex) {
-            extension.error("Could not save reset zone '" + getName()+ "'!", ex);
+            extension.error("Could not save reset zone '" + getName() + "'!", ex);
         }
 
         loadChunks();
@@ -136,12 +124,13 @@ public class Zone {
         this.config = extension.getConfiguration();
         this.arena = arena;
         this.file = file;
-        
+        this.logger = extension.getApi().getLogger();
+
         // Convert from old yml format if needed
         if (file.getName().endsWith(".yml")) {
             final FileConfiguration config = YamlConfiguration.loadConfiguration(file);
             final File newFile = new File(file.getParent(), arena.getName() + ".txt");
-            
+
             try (final BufferedWriter writer = new BufferedWriter(new FileWriter(newFile))) {
                 writer.write(config.getString("world"));
                 writer.newLine();
@@ -163,13 +152,13 @@ public class Zone {
                 if (blocks == null) {
                     return;
                 }
-    
+
                 for (String key : blocks.getKeys(false)) {
                     writer.write(key + ":" + blocks.getString(key));
                     writer.newLine();
                 }
             }
-            
+
             file.delete();
             extension.info("Converted " + file.getName() + " to " + newFile.getName() + ".");
 
@@ -233,8 +222,8 @@ public class Zone {
 
     private int calculateSize() {
         return (max.getBlockX() - min.getBlockX() + 1)
-            + (max.getBlockY() - min.getBlockY() + 1)
-            + (max.getBlockZ() - min.getBlockZ() + 1);
+                + (max.getBlockY() - min.getBlockY() + 1)
+                + (max.getBlockZ() - min.getBlockZ() + 1);
     }
 
     public int getTotalBlocks() {
@@ -296,11 +285,13 @@ public class Zone {
         arena.setDisabled(true);
 
         if (!config.isTrackBlockChanges()) {
-            startSyncTaskTimer(new ScanBlocksTask(extension, this, onDone));
+            this.logger.info("Starting to scan zone " + this.getName());
+            startSyncTaskTimer(new ScanBlocksTask(this.logger, extension, this, onDone));
             return;
         }
 
-        startAsyncTask(new FilterBlocksTask(extension, this, onDone, this.changedBlocks));
+        this.logger.info("Starting to filter zone " + this.getName());
+        startAsyncTask(new FilterBlocksTask(this.logger, extension, this, onDone, this.changedBlocks));
         this.changedBlocks = new HashSet<>();
     }
 
@@ -310,9 +301,9 @@ public class Zone {
 
     public boolean contains(final Location location) {
         return min.getWorld().equals(location.getWorld())
-            && min.getBlockX() <= location.getBlockX() && location.getBlockX() <= max.getBlockX()
-            && min.getBlockY() <= location.getBlockY() && location.getBlockY() <= max.getBlockY()
-            && min.getBlockZ() <= location.getBlockZ() && location.getBlockZ() <= max.getBlockZ();
+                && min.getBlockX() <= location.getBlockX() && location.getBlockX() <= max.getBlockX()
+                && min.getBlockY() <= location.getBlockY() && location.getBlockY() <= max.getBlockY()
+                && min.getBlockZ() <= location.getBlockZ() && location.getBlockZ() <= max.getBlockZ();
     }
 
     public boolean contains(final Block block) {

@@ -2,6 +2,8 @@ package me.realized.de.arenaregen.zone.task.tasks;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Logger;
+
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.util.BlockInfo;
 import me.realized.de.arenaregen.util.Callback;
@@ -21,8 +23,8 @@ public class ScanBlocksTask extends Task {
 
     private int x;
 
-    public ScanBlocksTask(final ArenaRegen extension, final Zone zone, final Callback onDone) {
-        super(extension, zone, onDone);
+    public ScanBlocksTask(Logger logger, final ArenaRegen extension, final Zone zone, final Callback onDone) {
+        super(logger, extension, zone, onDone);
         this.min = zone.getMin();
         this.max = zone.getMax();
         this.x = min.getBlockX();
@@ -55,7 +57,8 @@ public class ScanBlocksTask extends Task {
 
         if (x > max.getBlockX()) {
             cancel();
-            zone.startSyncTaskTimer(new ResetBlocksTask(extension, zone, onDone, changed));
+            this.logger.info("Starting to block reset task for zone " + this.zone.getName());
+            zone.startSyncTaskTimer(new ResetBlocksTask(logger, extension, zone, onDone, changed));
         }
     }
 }
