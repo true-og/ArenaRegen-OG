@@ -40,5 +40,14 @@ subprojects {
             name 'jitpack-repo'
             url 'https://jitpack.io'
         }
+        maven {
+            name = 'codemc-repo'
+            url "https://repo.codemc.org/repository/nms/"
+        }
+
+        maven {
+            name = 'paper-repo'
+            url = "https://repo.papermc.io/repository/maven-public/"
+        }
     }
 }

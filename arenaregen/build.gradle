@@ -20,7 +20,6 @@ dependencies {
     implementation 'com.github.Realizedd.Duels:duels-api:3.4.1'
     implementation project(':nms')
     implementation project(':v1_8_R3')
-    implementation project(':v1_8_R3_paper')
     implementation project(':v1_12_R1')
     implementation project(':v1_14_R1')
     implementation project(':v1_15_R1')
