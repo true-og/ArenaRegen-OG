@@ -1,15 +1,16 @@
 package me.realized.de.arenaregen.zone.task.tasks;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.logging.Logger;
-
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.util.Callback;
 import me.realized.de.arenaregen.util.ChunkLoc;
 import me.realized.de.arenaregen.zone.Zone;
 import me.realized.de.arenaregen.zone.task.Task;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
+
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.logging.Logger;
 
 public class ChunkRefreshTask extends Task {
 
@@ -42,7 +43,18 @@ public class ChunkRefreshTask extends Task {
             return;
         }
 
-        api.getServer().getOnlinePlayers().stream().filter(player -> player.getWorld().equals(chunk.getWorld())).forEach(online -> handler.sendChunkUpdate(online, chunk));
+        api.getServer().getOnlinePlayers().stream()
+                .filter(player -> player.getWorld() == chunk.getWorld())
+                .forEach(online -> {
+                    Location chunkLocation = new Location(chunk.getWorld(), (chunk.getX() << 4) + 7.5d, 0, (chunk.getZ() << 4) + 7.5d);
+                    Location playerLocation = online.getLocation().clone();
+                    playerLocation.setY(0);
+
+                    if (chunkLocation.distanceSquared(playerLocation) > (48 * 48)) {
+                        return;
+                    }
+                    handler.sendChunkUpdate(online, chunk);
+                });
     }
-    
+
 }
