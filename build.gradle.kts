@@ -1,13 +1,14 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
+    id("com.gradleup.shadow") version "8.3.2" // Import shadow API.
     java // Tell gradle this is a java project.
-    id("io.github.goooler.shadow") version "8.1.8" // Import shadow plugin for dependency shading.
     eclipse // Import eclipse plugin for IDE integration.
+    kotlin("jvm") version "2.0.20" // Import kotlin jvm plugin for kotlin/java integration.
 }
 
 java {
+    // Declare java version.
     sourceCompatibility = JavaVersion.VERSION_17
 }
 
@@ -16,14 +17,12 @@ version = "1.4"
 val apiVersion = "1.19"
 
 tasks.named<ProcessResources>("processResources") {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
     val props = mapOf(
         "version" to version,
         "apiVersion" to apiVersion
     )
 
-    inputs.properties(props)
+    inputs.properties(props) // Indicates to rerun if version changes.
 
     filesMatching("plugin.yml") {
         expand(props)
@@ -37,7 +36,7 @@ tasks.named<ProcessResources>("processResources") {
 
 repositories {
     mavenCentral()
-    
+    gradlePluginPortal()
     maven {
         url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     }
@@ -71,41 +70,43 @@ dependencies {
     // Shade remapped APIs into final jar.
     implementation("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
     implementation("org.spigotmc:spigot:1.19.4-R0.1-SNAPSHOT")
+    
+    implementation(project(":libs:Utilities-OG"))
+    implementation(project(":libs:GxUI-OG"))
+    implementation(project(":libs:DiamondBank-OG"))
 }
 
-tasks.withType<ShadowJar> {
-    destinationDirectory.set(file("$rootDir/out/"))
-
-    val archiveName = parent?.name?.replace("Parent", "") + '-' + project.version + ".jar"
-    archiveFileName.set(archiveName)
-
-    from(project.configurations.runtimeClasspath.get().asFileTree)
-    exclude("io.github.miniplaceholders.*")
-    minimize()
-}
-
-tasks.jar {
-    dependsOn(tasks.shadowJar)
-    archiveClassifier.set("part")
-    from("LICENSE") {
-        into("/")
-    }
-}
-
-tasks.withType<AbstractArchiveTask>().configureEach {
+tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible builds.
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
 }
 
+tasks.shadowJar {
+    archiveClassifier.set("") // Use empty string instead of null
+    from("LICENSE") {
+        into("/")
+    }
+    exclude("io.github.miniplaceholders.*") // Exclude the MiniPlaceholders package from being shadowed.
+    minimize()
+}
+
 tasks.build {
-    dependsOn(tasks.getByName("shadowJar"))
+    dependsOn(tasks.shadowJar)
+}
+
+tasks.jar {
+    archiveClassifier.set("part")
 }
 
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-parameters")
-    options.compilerArgs.add("-Xlint:deprecation")
+    options.compilerArgs.add("-Xlint:deprecation") // Triggers deprecation warning messages.
     options.encoding = "UTF-8"
     options.isFork = true
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 java {
@@ -114,3 +115,4 @@ java {
         vendor = JvmVendorSpec.GRAAL_VM
     }
 }
+
