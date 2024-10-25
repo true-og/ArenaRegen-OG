@@ -17,7 +17,9 @@ version = "1.4"
 val apiVersion = "1.19"
 
 tasks.named<ProcessResources>("processResources") {
-    val props = mapOf(
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite duplicate files
+
+	val props = mapOf(
         "version" to version,
         "apiVersion" to apiVersion
     )
