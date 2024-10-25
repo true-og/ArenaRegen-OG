@@ -72,8 +72,6 @@ dependencies {
     implementation("org.spigotmc:spigot:1.19.4-R0.1-SNAPSHOT")
     
     implementation(project(":libs:Utilities-OG"))
-    implementation(project(":libs:GxUI-OG"))
-    implementation(project(":libs:DiamondBank-OG"))
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible builds.
