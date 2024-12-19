@@ -16,6 +16,22 @@ group = "me.realized.de"
 version = "1.4"
 val apiVersion = "1.19"
 
+val customMavenLocal = System.getProperty("SELF_MAVEN_LOCAL_REPO")
+if (customMavenLocal != null) {
+    val mavenLocalDir = file(customMavenLocal)
+    if (mavenLocalDir.isDirectory) {
+        println("Using SELF_MAVEN_LOCAL_REPO at: $customMavenLocal")
+        repositories {
+            maven {
+                url = uri("file://${mavenLocalDir.absolutePath}")
+            }
+        }
+    } else {
+        logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
+    }
+} else {
+    logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 to mavenLocal()")
+}
 tasks.named<ProcessResources>("processResources") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite duplicate files
 
@@ -39,6 +55,7 @@ tasks.named<ProcessResources>("processResources") {
 repositories {
     mavenCentral()
     gradlePluginPortal()
+    mavenLocal()
     maven {
         url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     }
