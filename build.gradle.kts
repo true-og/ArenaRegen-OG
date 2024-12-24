@@ -16,22 +16,6 @@ group = "me.realized.de"
 version = "1.4"
 val apiVersion = "1.19"
 
-val customMavenLocal = System.getProperty("SELF_MAVEN_LOCAL_REPO")
-if (customMavenLocal != null) {
-    val mavenLocalDir = file(customMavenLocal)
-    if (mavenLocalDir.isDirectory) {
-        println("Using SELF_MAVEN_LOCAL_REPO at: $customMavenLocal")
-        repositories {
-            maven {
-                url = uri("file://${mavenLocalDir.absolutePath}")
-            }
-        }
-    } else {
-        logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
-    }
-} else {
-    logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 to mavenLocal()")
-}
 tasks.named<ProcessResources>("processResources") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite duplicate files
 
@@ -53,25 +37,39 @@ tasks.named<ProcessResources>("processResources") {
 }
 
 repositories {
+	val customMavenLocal = System.getProperty("SELF_MAVEN_LOCAL_REPO")
+	if (customMavenLocal != null) {
+		val mavenLocalDir = file(customMavenLocal)
+		if (mavenLocalDir.isDirectory) {
+		    println("Using SELF_MAVEN_LOCAL_REPO at: $customMavenLocal")
+	        maven {
+	            url = uri("file://${mavenLocalDir.absolutePath}")
+	        }
+		} else {
+		    logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
+		}
+	} else {
+		logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 to mavenLocal()")
+	}
     mavenCentral()
     gradlePluginPortal()
     mavenLocal()
     maven {
         url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     }
-    
+
     maven {
         url = uri("https://repo.purpurmc.org/snapshots")
     }
-    
+
     maven {
         url = uri("https://jitpack.io")
     }
-    
+
     maven {
         url = uri("https://maven.enginehub.org/repo/")
     }
-    
+
     maven {
         url = uri("file://${System.getProperty("user.home")}/.m2/repository")
     }
@@ -89,7 +87,7 @@ dependencies {
     // Shade remapped APIs into final jar.
     implementation("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
     implementation("org.spigotmc:spigot:1.19.4-R0.1-SNAPSHOT")
-    
+
     implementation(project(":libs:Utilities-OG"))
 }
 
