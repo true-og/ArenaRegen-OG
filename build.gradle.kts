@@ -37,20 +37,6 @@ tasks.named<ProcessResources>("processResources") {
 }
 
 repositories {
-	val customMavenLocal = System.getProperty("SELF_MAVEN_LOCAL_REPO")
-	if (customMavenLocal != null) {
-		val mavenLocalDir = file(customMavenLocal)
-		if (mavenLocalDir.isDirectory) {
-		    println("Using SELF_MAVEN_LOCAL_REPO at: $customMavenLocal")
-	        maven {
-	            url = uri("file://${mavenLocalDir.absolutePath}")
-	        }
-		} else {
-		    logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
-		}
-	} else {
-		logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 to mavenLocal()")
-	}
     mavenCentral()
     gradlePluginPortal()
     mavenLocal()
@@ -73,6 +59,20 @@ repositories {
     maven {
         url = uri("file://${System.getProperty("user.home")}/.m2/repository")
     }
+	val customMavenLocal = System.getProperty("SELF_MAVEN_LOCAL_REPO")
+	if (customMavenLocal != null) {
+		val mavenLocalDir = file(customMavenLocal)
+		if (mavenLocalDir.isDirectory) {
+		    println("Using SELF_MAVEN_LOCAL_REPO at: $customMavenLocal")
+	        maven {
+	            url = uri("file://${mavenLocalDir.absolutePath}")
+	        }
+		} else {
+		    logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
+		}
+	} else {
+		logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 to mavenLocal()")
+	}
 }
 
 dependencies {
