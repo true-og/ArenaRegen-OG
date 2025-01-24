@@ -1,7 +1,7 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.2" // Import shadow API.
+    id("com.gradleup.shadow") version "8.3.5" // Import shadow API.
     java // Tell gradle this is a java project.
     eclipse // Import eclipse plugin for IDE integration.
     kotlin("jvm") version "2.0.21" // Import kotlin jvm plugin for kotlin/java integration.
@@ -71,7 +71,7 @@ repositories {
 		    logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
 		}
 	} else {
-		logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 to mavenLocal()")
+		logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
 	}
 }
 
