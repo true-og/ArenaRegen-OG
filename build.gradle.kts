@@ -1,7 +1,7 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.5" // Import shadow API.
+    id("com.gradleup.shadow") version "8.3.6" // Import shadow API.
     java // Tell gradle this is a java project.
     eclipse // Import eclipse plugin for IDE integration.
     kotlin("jvm") version "2.1.21" // Import kotlin jvm plugin for kotlin/java integration.
@@ -18,7 +18,6 @@ val apiVersion = "1.19"
 
 tasks.named<ProcessResources>("processResources") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite duplicate files
-
 	val props = mapOf(
         "version" to version,
         "apiVersion" to apiVersion
@@ -29,7 +28,9 @@ tasks.named<ProcessResources>("processResources") {
     filesMatching("plugin.yml") {
         expand(props)
     }
-
+    from("LICENSE") { // Bundle license into .jars.
+        into("/")
+    }
     from(sourceSets.main.get().resources.srcDirs) {
         include("**/*.yml")
         filter<ReplaceTokens>("tokens" to mapOf("VERSION" to project.version.toString()))
@@ -82,26 +83,21 @@ dependencies {
     compileOnly("io.github.miniplaceholders:miniplaceholders-api:2.2.3")
     implementation("com.github.Realizedd.Duels:duels-api:3.4.1") // Import/Shade Duels API.
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.8") // Import WorldGuard API.
-    compileOnly("io.github.miniplaceholders:miniplaceholders-kotlin-ext:2.2.3") // Import MiniPlaceholders API helper.
-
+    compileOnly("io.github.miniplaceholders:miniplaceholders-api:2.2.3") // Import MiniPlaceholders API.
     // Shade remapped APIs into final jar.
     implementation("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
     implementation("org.spigotmc:spigot:1.19.4-R0.1-SNAPSHOT")
-
-    implementation(project(":libs:Utilities-OG"))
+    compileOnly(project(":libs:Utilities-OG"))
 }
 
-tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible builds.
+tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible .jars
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
 }
 
 tasks.shadowJar {
-    archiveClassifier.set("") // Use empty string instead of null
-    from("LICENSE") {
-        into("/")
-    }
     exclude("io.github.miniplaceholders.*") // Exclude the MiniPlaceholders package from being shadowed.
+    archiveClassifier.set("") // Use empty string instead of null.
     minimize()
 }
 
