@@ -1,8 +1,10 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
+    id("java") // Tell gradle this is a java project.
+    id("java-library") // Import helper for source-based libraries.
+    id("com.diffplug.spotless") version "7.0.4"
     id("com.gradleup.shadow") version "8.3.6" // Import shadow API.
-    java // Tell gradle this is a java project.
     eclipse // Import eclipse plugin for IDE integration.
 }
 
@@ -17,7 +19,7 @@ val apiVersion = "1.19"
 
 tasks.named<ProcessResources>("processResources") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite duplicate files
-	val props = mapOf(
+    val props = mapOf(
         "version" to version,
         "apiVersion" to apiVersion
     )
@@ -43,36 +45,34 @@ repositories {
     maven {
         url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     }
-
     maven {
         url = uri("https://repo.purpurmc.org/snapshots")
     }
-
     maven {
         url = uri("https://jitpack.io")
     }
-
     maven {
         url = uri("https://maven.enginehub.org/repo/")
     }
-
     maven {
         url = uri("file://${System.getProperty("user.home")}/.m2/repository")
     }
-	val customMavenLocal = System.getProperty("SELF_MAVEN_LOCAL_REPO")
-	if (customMavenLocal != null) {
-		val mavenLocalDir = file(customMavenLocal)
-		if (mavenLocalDir.isDirectory) {
-		    println("Using SELF_MAVEN_LOCAL_REPO at: $customMavenLocal")
-	        maven {
-	            url = uri("file://${mavenLocalDir.absolutePath}")
-	        }
-		} else {
-		    logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
-		}
-	} else {
-		logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
+    val customMavenLocal = System.getProperty("SELF_MAVEN_LOCAL_REPO")
+    if (customMavenLocal != null) {
+        val mavenLocalDir = file(customMavenLocal)
+	if (mavenLocalDir.isDirectory) {
+	    println("Using SELF_MAVEN_LOCAL_REPO at: $customMavenLocal")
+	    maven {
+	        url = uri("file://${mavenLocalDir.absolutePath}")
+	    }
 	}
+	else {
+	    logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
+	}
+    }
+    else {
+	logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
+    }
 }
 
 dependencies {
