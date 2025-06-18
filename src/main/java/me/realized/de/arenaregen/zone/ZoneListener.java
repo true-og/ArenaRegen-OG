@@ -1,7 +1,15 @@
 package me.realized.de.arenaregen.zone;
 
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.Set;
-
+import me.realized.de.arenaregen.ArenaRegen;
+import me.realized.de.arenaregen.config.Config;
+import me.realized.de.arenaregen.config.Lang;
+import me.realized.de.arenaregen.util.ChunkLoc;
+import me.realized.duels.api.arena.Arena;
+import me.realized.duels.api.event.arena.ArenaRemoveEvent;
+import me.realized.duels.api.event.match.MatchEndEvent;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -23,414 +31,349 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
-import com.sk89q.worldguard.protection.flags.StateFlag;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
-import me.realized.de.arenaregen.ArenaRegen;
-import me.realized.de.arenaregen.config.Config;
-import me.realized.de.arenaregen.config.Lang;
-import me.realized.de.arenaregen.util.ChunkLoc;
-import me.realized.duels.api.arena.Arena;
-import me.realized.duels.api.event.arena.ArenaRemoveEvent;
-import me.realized.duels.api.event.match.MatchEndEvent;
-
 public class ZoneListener implements Listener {
 
-	private final Config config;
-	private final Lang lang;
-	private final ZoneManager zoneManager;
+    private final Config config;
+    private final Lang lang;
+    private final ZoneManager zoneManager;
 
-	public ZoneListener(final ArenaRegen extension, final ZoneManager zoneManager) {
+    public ZoneListener(final ArenaRegen extension, final ZoneManager zoneManager) {
 
-		this.config = extension.getConfiguration();
-		this.lang = extension.getLang();
-		this.zoneManager = zoneManager;
+        this.config = extension.getConfiguration();
+        this.lang = extension.getLang();
+        this.zoneManager = zoneManager;
+    }
 
-	}
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void on(final ChunkUnloadEvent event) {
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void on(final ChunkUnloadEvent event) {
+        for (final Entity entity : event.getChunk().getEntities()) {
 
-		for (final Entity entity : event.getChunk().getEntities()) {
+            // Check if the chunk is part of a duel arena.
+            if (isInDuelArena(event.getChunk())) {
 
-			// Check if the chunk is part of a duel arena.
-			if (isInDuelArena(event.getChunk())) {
+                // Check if the entity is of the type that should be removed.
+                if (!(entity instanceof Item)
+                        && !config.getRemoveEntities()
+                                .contains(entity.getType().name().toUpperCase())) {
 
-				// Check if the entity is of the type that should be removed.
-				if (! (entity instanceof Item) && ! config.getRemoveEntities().contains(entity.getType().name().toUpperCase())) {
+                    continue;
+                }
 
-					continue;
+                entity.remove();
+            }
+        }
+    }
 
-				}
+    private boolean isInDuelArena(Chunk chunk) {
 
-				entity.remove();
+        // Get the set of regions the chunk is within.
+        Set<ProtectedRegion> regions = getChunkRegions(chunk);
 
-			}
+        // Check if the region has the custom "duels-arena" flag set to ALLOW.
+        for (ProtectedRegion region : regions) {
 
-		}
+            if (region.getFlag(ArenaRegen.DUELS_ARENA) == StateFlag.State.ALLOW) {
 
-	}
+                return true;
+            }
+        }
 
+        return false;
+    }
 
-	private boolean isInDuelArena(Chunk chunk) {
+    // Get a set of the regions that a chunk is within.
+    public static Set<ProtectedRegion> getChunkRegions(Chunk chunk) {
 
-		// Get the set of regions the chunk is within.
-		Set<ProtectedRegion> regions = getChunkRegions(chunk);
+        // Use the provided RegionDetection class to get the regions within the chunk.
+        Set<ProtectedRegion> regions = RegionDetection.getRegionsInChunk(chunk);
 
-		// Check if the region has the custom "duels-arena" flag set to ALLOW.
-		for (ProtectedRegion region : regions) {
+        // Return the set of regions.
+        return regions;
+    }
 
-			if (region.getFlag(ArenaRegen.DUELS_ARENA) == StateFlag.State.ALLOW) {
+    @EventHandler
+    public void on(final MatchEndEvent event) {
 
-				return true;
+        final Arena arena = event.getMatch().getArena();
+        final Zone zone = zoneManager.get(arena);
 
-			}
+        if (zone == null) {
 
-		}
+            return;
+        }
 
-		return false;
+        for (final ChunkLoc chunkLoc : zone.getChunks()) {
 
-	}
+            final Chunk chunk = zone.getWorld().getChunkAt(chunkLoc.getX(), chunkLoc.getZ());
 
+            for (final Entity entity : chunk.getEntities()) {
 
-	// Get a set of the regions that a chunk is within.
-	public static Set<ProtectedRegion> getChunkRegions(Chunk chunk) {
+                if (!(entity instanceof Item)
+                        && !config.getRemoveEntities()
+                                .contains(entity.getType().name().toUpperCase())) {
+                    continue;
+                }
 
-		// Use the provided RegionDetection class to get the regions within the chunk.
-		Set<ProtectedRegion> regions = RegionDetection.getRegionsInChunk(chunk);
+                entity.remove();
+            }
+        }
 
-		// Return the set of regions.
-		return regions;
+        zone.reset();
+    }
 
-	}
+    @EventHandler
+    public void on(final ArenaRemoveEvent event) {
 
-	@EventHandler
-	public void on(final MatchEndEvent event) {
+        zoneManager.remove(event.getArena().getName());
+    }
 
-		final Arena arena = event.getMatch().getArena();
-		final Zone zone = zoneManager.get(arena);
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void on(final BlockBreakEvent event) {
 
-		if (zone == null) {
+        final Block block = event.getBlock();
+        final Player player = event.getPlayer();
+        final Zone zone = zoneManager.get(player);
 
-			return;
+        if (zone == null) {
 
-		}
+            return;
+        }
 
-		for (final ChunkLoc chunkLoc : zone.getChunks()) {
+        if (config.isTrackBlockChanges()) {
 
-			final Chunk chunk = zone.getWorld().getChunkAt(chunkLoc.getX(), chunkLoc.getZ());
+            zone.track(block);
+        }
 
-			for (final Entity entity : chunk.getEntities()) {
+        if (config.isAllowArenaBlockBreak() || !zone.isCached(block)) {
 
-				if (! (entity instanceof Item) && !config.getRemoveEntities().contains(entity.getType().name().toUpperCase())) {
-					continue;
+            return;
+        }
 
-				}
+        event.setCancelled(true);
+        lang.sendMessage(player, "ERROR.cancel-arena-block-break");
+    }
 
-				entity.remove();
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void on(final BlockPlaceEvent event) {
 
-			}
+        if (!config.isTrackBlockChanges()) {
 
-		}
+            return;
+        }
 
-		zone.reset();
+        final Player player = event.getPlayer();
+        final Zone zone = zoneManager.get(player);
 
-	}
+        if (zone == null) {
 
+            return;
+        }
 
-	@EventHandler
-	public void on(final ArenaRemoveEvent event) {
+        zone.track(event.getBlock());
+    }
 
-		zoneManager.remove(event.getArena().getName());
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void on(final BlockFadeEvent event) {
 
-	}
+        final Block block = event.getBlock();
+        final Zone zone = zoneManager.get(block);
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void on(final BlockBreakEvent event) {
+        if (zone == null) {
 
-		final Block block = event.getBlock();
-		final Player player = event.getPlayer();
-		final Zone zone = zoneManager.get(player);
+            return;
+        }
 
-		if (zone == null) {
+        if (config.isTrackBlockChanges()) {
 
-			return;
+            zone.track(block);
+        }
 
-		}
+        if (!config.isPreventBlockMelt()) {
 
-		if (config.isTrackBlockChanges()) {
+            return;
+        }
 
-			zone.track(block);
+        final Material changedType = event.getNewState().getType();
 
-		}
+        if (!(changedType == Material.AIR || changedType.name().contains("WATER"))) {
 
-		if (config.isAllowArenaBlockBreak() || !zone.isCached(block)) {
+            return;
+        }
 
-			return;
+        event.setCancelled(true);
+    }
 
-		}
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void on(final BlockBurnEvent event) {
 
-		event.setCancelled(true);
-		lang.sendMessage(player, "ERROR.cancel-arena-block-break");
+        final Block block = event.getBlock();
+        final Zone zone = zoneManager.get(block);
 
-	}
+        if (zone == null) {
 
+            return;
+        }
 
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void on(final BlockPlaceEvent event) {
+        if (config.isTrackBlockChanges()) {
 
-		if (! config.isTrackBlockChanges()) {
+            zone.track(block);
+        }
 
-			return;
+        if (!config.isPreventBlockBurn()) {
 
-		}
+            return;
+        }
 
-		final Player player = event.getPlayer();
-		final Zone zone = zoneManager.get(player);
+        event.setCancelled(true);
+    }
 
-		if (zone == null) {
+    // @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    // public void on(final EntityExplodeEvent event) {
+    //     final Zone zone = zoneManager.get(event.getEntity().getLocation().getBlock());
 
-			return;
+    //     if (zone == null) {
+    //         return;
+    //     }
 
-		}
+    //     if (config.isTrackBlockChanges()) {
+    //         zone.track(event.blockList());
+    //     }
 
-		zone.track(event.getBlock());
+    //       if (config.isPreventBlockExplode()) {
+    //      event.setCancelled(true);
+    //       }
+    //   else {
+    //     return;
+    //   }
 
-	}
+    // }
 
+    // event.setCancelled(true);
+    // }
 
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void on(final BlockFadeEvent event) {
+    // @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    // public void on(final BlockExplodeEvent event) {
+    //     final Block block = event.getBlock();
+    //     final Zone zone = zoneManager.get(block);
 
-		final Block block = event.getBlock();
-		final Zone zone = zoneManager.get(block);
+    //     if (zone == null) {
+    //         return;
+    //     }
 
-		if (zone == null) {
+    //     if (config.isTrackBlockChanges()) {
+    //         zone.track(event.blockList());
+    //     }
 
-			return;
+    //     if (!config.isPreventBlockExplode()) {
+    //         return;
+    //     }
 
-		}
+    //     event.setCancelled(true);
+    // }
 
-		if (config.isTrackBlockChanges()) {
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void on(final BlockIgniteEvent event) {
 
-			zone.track(block);
+        final Block block = event.getBlock();
+        final Zone zone = zoneManager.get(block);
 
-		}
+        if (zone == null) {
 
-		if (! config.isPreventBlockMelt()) {
+            return;
+        }
 
-			return;
+        if (config.isTrackBlockChanges()) {
 
-		}
+            zone.track(block);
+        }
 
-		final Material changedType = event.getNewState().getType();
+        if (!config.isPreventFireSpread() || event.getCause() != IgniteCause.SPREAD) {
 
-		if (! (changedType == Material.AIR || changedType.name().contains("WATER"))) {
+            return;
+        }
 
-			return;
+        event.setCancelled(true);
+    }
 
-		}
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void on(final LeavesDecayEvent event) {
 
-		event.setCancelled(true);
+        final Block block = event.getBlock();
+        final Zone zone = zoneManager.get(block);
 
-	}
+        if (zone == null) {
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void on(final BlockBurnEvent event) {
+            return;
+        }
 
-		final Block block = event.getBlock();
-		final Zone zone = zoneManager.get(block);
+        if (config.isTrackBlockChanges()) {
 
-		if (zone == null) {
+            zone.track(event.getBlock());
+        }
 
-			return;
+        if (!config.isPreventLeafDecay()) {
 
-		}
+            return;
+        }
 
-		if (config.isTrackBlockChanges()) {
+        event.setCancelled(true);
+    }
 
-			zone.track(block);
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void on(final BlockPhysicsEvent event) {
 
-		}
+        if (!config.isTrackBlockChanges()) {
 
-		if (! config.isPreventBlockBurn()) {
+            return;
+        }
 
-			return;
+        final Block block = event.getBlock();
+        final Zone zone = zoneManager.get(block);
 
-		}
+        if (zone == null) {
 
-		event.setCancelled(true);
+            return;
+        }
 
-	}
+        zone.track(event.getBlock());
+    }
 
-	// @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	// public void on(final EntityExplodeEvent event) {
-	//     final Zone zone = zoneManager.get(event.getEntity().getLocation().getBlock());
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void on(final BlockGrowEvent event) {
 
-	//     if (zone == null) {
-	//         return;
-	//     }
+        if (!config.isTrackBlockChanges()) {
 
-	//     if (config.isTrackBlockChanges()) {
-	//         zone.track(event.blockList());
-	//     }
+            return;
+        }
 
-	//       if (config.isPreventBlockExplode()) {
-	//      event.setCancelled(true);
-	//       }
-	//   else {
-	//     return;
-	//   }
+        final Block block = event.getBlock();
+        final Zone zone = zoneManager.get(block);
 
-	//}
+        if (zone == null) {
 
-	//event.setCancelled(true);
-	//}
+            return;
+        }
 
-	// @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	// public void on(final BlockExplodeEvent event) {
-	//     final Block block = event.getBlock();
-	//     final Zone zone = zoneManager.get(block);
+        zone.track(event.getBlock());
+    }
 
-	//     if (zone == null) {
-	//         return;
-	//     }
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void on(final BlockFromToEvent event) {
 
-	//     if (config.isTrackBlockChanges()) {
-	//         zone.track(event.blockList());
-	//     }
+        if (!config.isTrackBlockChanges()) {
 
-	//     if (!config.isPreventBlockExplode()) {
-	//         return;
-	//     }
+            return;
+        }
 
-	//     event.setCancelled(true);
-	// }
+        final Block block = event.getBlock();
+        final Zone zone = zoneManager.get(block);
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void on(final BlockIgniteEvent event) {
+        if (zone == null) {
 
-		final Block block = event.getBlock();
-		final Zone zone = zoneManager.get(block);
+            return;
+        }
 
-		if (zone == null) {
-
-			return;
-
-		}
-
-		if (config.isTrackBlockChanges()) {
-
-			zone.track(block);
-
-		}
-
-		if (! config.isPreventFireSpread() || event.getCause() != IgniteCause.SPREAD) {
-
-			return;
-
-		}
-
-		event.setCancelled(true);
-
-	}
-
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void on(final LeavesDecayEvent event) {
-
-		final Block block = event.getBlock();
-		final Zone zone = zoneManager.get(block);
-
-		if (zone == null) {
-
-			return;
-
-		}
-
-		if (config.isTrackBlockChanges()) {
-
-			zone.track(event.getBlock());
-
-		}
-
-		if (! config.isPreventLeafDecay()) {
-
-			return;
-
-		}
-
-		event.setCancelled(true);
-
-	}
-
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void on(final BlockPhysicsEvent event) {
-
-		if (! config.isTrackBlockChanges()) {
-
-			return;
-
-		}
-
-		final Block block = event.getBlock();
-		final Zone zone = zoneManager.get(block);
-
-		if (zone == null) {
-
-			return;
-
-		}
-
-		zone.track(event.getBlock());
-
-	}
-
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void on(final BlockGrowEvent event) {
-
-		if (! config.isTrackBlockChanges()) {
-
-			return;
-
-		}
-
-		final Block block = event.getBlock();
-		final Zone zone = zoneManager.get(block);
-
-		if (zone == null) {
-
-			return;
-
-		}
-
-		zone.track(event.getBlock());
-
-	}
-
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void on(final BlockFromToEvent event) {
-
-		if (! config.isTrackBlockChanges()) {
-
-			return;
-
-		}
-
-		final Block block = event.getBlock();
-		final Zone zone = zoneManager.get(block);
-
-		if (zone == null) {
-
-			return;
-
-		}
-
-		zone.track(event.getBlock());
-
-	}
-
+        zone.track(event.getBlock());
+    }
 }

@@ -1,7 +1,6 @@
 package me.realized.de.arenaregen.nms;
 
 import java.lang.reflect.Method;
-
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -9,82 +8,71 @@ import org.bukkit.block.data.BlockData;
 
 public class BlockInfo {
 
-	private final Material type;
-	private final BlockData data;
+    private final Material type;
+    private final BlockData data;
 
-	public BlockInfo(final Material type, final BlockData data) {
+    public BlockInfo(final Material type, final BlockData data) {
 
-		this.type = type;
-		this.data = data;
+        this.type = type;
+        this.data = data;
+    }
 
-	}
+    public BlockInfo() {
 
-	public BlockInfo() {
+        this(Material.AIR, Material.AIR.createBlockData());
+    }
 
-		this(Material.AIR, Material.AIR.createBlockData());
+    public BlockInfo(final BlockState state) {
 
-	}
+        this(state.getType(), state.getBlockData());
+    }
 
-	public BlockInfo(final BlockState state) {
+    public Material getType() {
 
-		this(state.getType(), state.getBlockData());
+        return type;
+    }
 
-	}
+    public BlockData getData() {
 
-	public Material getType() {
+        return data;
+    }
 
-		return type;
+    public boolean matches(final Block block) {
 
-	}
+        return block.getType() == type && block.getBlockData().matches(data);
+    }
 
-	public BlockData getData() {
+    public int getDataAsInt() {
 
-		return data;
+        try {
 
-	}
+            // Get the CraftBlockData class.
+            Class<?> craftBlockDataClass = Class.forName("org.bukkit.craftbukkit.v1_19_R3.block.data.CraftBlockData");
 
-	public boolean matches(final Block block) {
+            // Get the handle to the state.
+            Method getStateMethod = craftBlockDataClass.getMethod("getState");
+            Object nmsState = getStateMethod.invoke(data);
 
-		return block.getType() == type && block.getBlockData().matches(data);
+            // Get the Block class and the getId method.
+            Class<?> blockClass = Class.forName("net.minecraft.world.level.block.Block");
+            Method getIdMethod =
+                    blockClass.getMethod("getId", Class.forName("net.minecraft.world.level.block.state.BlockState"));
 
-	}
+            // Invoke the getId method.
+            return (int) getIdMethod.invoke(null, nmsState);
 
-	public int getDataAsInt() {
+        } catch (Exception error) {
 
-		try {
+            error.printStackTrace();
 
-			// Get the CraftBlockData class.
-			Class<?> craftBlockDataClass = Class.forName("org.bukkit.craftbukkit.v1_19_R3.block.data.CraftBlockData");
+            // Return a default value.
+            return -1;
+        }
+    }
 
-			// Get the handle to the state.
-			Method getStateMethod = craftBlockDataClass.getMethod("getState");
-			Object nmsState = getStateMethod.invoke(data);
+    @Override
+    public String toString() {
 
-			// Get the Block class and the getId method.
-			Class<?> blockClass = Class.forName("net.minecraft.world.level.block.Block");
-			Method getIdMethod = blockClass.getMethod("getId", Class.forName("net.minecraft.world.level.block.state.BlockState"));
-
-			// Invoke the getId method.
-			return (int) getIdMethod.invoke(null, nmsState);
-
-		}
-		catch (Exception error) {
-
-			error.printStackTrace();
-
-			// Return a default value.
-			return -1;
-
-		}
-
-	}
-
-	@Override
-	public String toString() {
-
-		return type + ";" + data.getAsString();
-
-	}
-
-
+        return type + ";" + data.getAsString();
+    }
 }

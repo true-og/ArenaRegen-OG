@@ -3,124 +3,99 @@ package me.realized.de.arenaregen.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
 import org.bukkit.Bukkit;
 
 public final class ReflectionUtil {
 
-	private final static String VERSION;
+    private static final String VERSION;
 
-	static {
+    static {
+        VERSION = Bukkit.getServer().getClass().getName().split("\\.")[3];
+    }
 
-		VERSION = Bukkit.getServer().getClass().getName().split("\\.")[3];
+    private ReflectionUtil() {}
 
-	}
+    public static Class<?> getClassUnsafe(final String name) {
 
-	private ReflectionUtil() {}
+        try {
 
-	public static Class<?> getClassUnsafe(final String name) {
+            return Class.forName(name);
 
-		try {
+        } catch (ClassNotFoundException error) {
 
-			return Class.forName(name);
+            return null;
+        }
+    }
 
-		}
-		catch (ClassNotFoundException error) {
+    public static Class<?> getNMSClass(final String name) {
 
-			return null;
+        try {
 
-		}
+            return Class.forName("net.minecraft.server." + VERSION + "." + name);
 
-	}
+        } catch (ClassNotFoundException error) {
 
-	public static Class<?> getNMSClass(final String name) {
+            return null;
+        }
+    }
 
-		try {
+    public static Class<?> getCBClass(final String path) {
 
-			return Class.forName("net.minecraft.server." + VERSION + "." + name);
+        try {
 
-		}
-		catch (ClassNotFoundException error) {
+            return Class.forName("org.bukkit.craftbukkit." + VERSION + "." + path);
 
-			return null;
+        } catch (ClassNotFoundException error) {
 
-		}
+            return null;
+        }
+    }
 
-	}
+    public static Method getMethod(final Class<?> clazz, final String name, final Class<?>... parameters) {
 
-	public static Class<?> getCBClass(final String path) {
+        try {
 
-		try {
+            return clazz.getMethod(name, parameters);
 
-			return Class.forName("org.bukkit.craftbukkit." + VERSION + "." + path);
+        } catch (Throwable throwable) {
 
-		}
-		catch (ClassNotFoundException error) {
+            return null;
+        }
+    }
 
-			return null;
+    public static Field getField(final Class<?> clazz, final String name) {
 
-		}
+        try {
 
-	}
+            return clazz.getField(name);
 
-	public static Method getMethod(final Class<?> clazz, final String name, final Class<?>... parameters) {
+        } catch (Throwable throwable) {
 
-		try {
+            return null;
+        }
+    }
 
-			return clazz.getMethod(name, parameters);
+    public static Constructor<?> getConstructor(final Class<?> clazz, final Class<?>... parameters) {
 
-		}
-		catch (Throwable throwable) {
+        try {
 
-			return null;
+            return clazz.getConstructor(parameters);
 
-		}
+        } catch (Throwable throwable) {
 
-	}
+            return null;
+        }
+    }
 
-	public static Field getField(final Class<?> clazz, final String name) {
+    public static Object getEnumConstant(final Class<?> clazz, final int index) {
 
-		try {
+        try {
 
-			return clazz.getField(name);
+            return clazz.getEnumConstants()[index];
 
-		}
-		catch (Throwable throwable) {
+        } catch (Throwable throwable) {
 
-			return null;
-
-		}
-
-	}
-
-	public static Constructor<?> getConstructor(final Class<?> clazz, final Class<?>... parameters) {
-
-		try {
-
-			return clazz.getConstructor(parameters);
-
-		}
-		catch (Throwable throwable) {
-
-			return null;
-
-		}
-
-	}
-
-	public static Object getEnumConstant(final Class<?> clazz, final int index) {
-
-		try {
-
-			return clazz.getEnumConstants()[index];
-
-		}
-		catch (Throwable throwable) {
-
-			return null;
-
-		}
-
-	}
-
+            return null;
+        }
+    }
 }

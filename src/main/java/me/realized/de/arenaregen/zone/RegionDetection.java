@@ -1,16 +1,5 @@
 package me.realized.de.arenaregen.zone;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import org.bukkit.Chunk;
-import org.bukkit.World;
-
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldguard.WorldGuard;
@@ -18,83 +7,84 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import org.bukkit.Chunk;
+import org.bukkit.World;
 
 public class RegionDetection {
 
-	public static Set<ProtectedRegion> getRegionsInChunk(Chunk chunk) {
+    public static Set<ProtectedRegion> getRegionsInChunk(Chunk chunk) {
 
-		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-		Set<Future<Set<ProtectedRegion>>> futures = new HashSet<>();
+        ExecutorService executor =
+                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        Set<Future<Set<ProtectedRegion>>> futures = new HashSet<>();
 
-		// Divide the chunk into sections for parallel processing.
-		for (int x = 0; x < 16; x++) {
+        // Divide the chunk into sections for parallel processing.
+        for (int x = 0; x < 16; x++) {
 
-			for (int z = 0; z < 16; z++) {
+            for (int z = 0; z < 16; z++) {
 
-				futures.add(executor.submit(new RegionTask(chunk, x, z)));
-			}
+                futures.add(executor.submit(new RegionTask(chunk, x, z)));
+            }
+        }
 
-		}
+        Set<ProtectedRegion> regions = new HashSet<>();
+        for (Future<Set<ProtectedRegion>> future : futures) {
 
-		Set<ProtectedRegion> regions = new HashSet<>();
-		for (Future<Set<ProtectedRegion>> future : futures) {
+            try {
 
-			try {
+                regions.addAll(future.get());
 
-				regions.addAll(future.get());
+            } catch (InterruptedException | ExecutionException error) {
 
-			}
-			catch (InterruptedException | ExecutionException error) {
+                error.printStackTrace();
+            }
+        }
 
-				error.printStackTrace();
+        executor.shutdown();
 
-			}
+        return regions;
+    }
 
-		}
+    static class RegionTask implements Callable<Set<ProtectedRegion>> {
 
-		executor.shutdown();
+        private final Chunk chunk;
+        private final int x;
+        private final int z;
 
-		return regions;
+        public RegionTask(Chunk chunk, int x, int z) {
 
-	}
+            this.chunk = chunk;
+            this.x = x;
+            this.z = z;
+        }
 
-	static class RegionTask implements Callable<Set<ProtectedRegion>> {
+        @Override
+        public Set<ProtectedRegion> call() {
 
-		private final Chunk chunk;
-		private final int x;
-		private final int z;
+            Set<ProtectedRegion> regions = new HashSet<>();
+            World world = chunk.getWorld();
 
-		public RegionTask(Chunk chunk, int x, int z) {
+            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            RegionQuery query = container.createQuery();
 
-			this.chunk = chunk;
-			this.x = x;
-			this.z = z;
+            for (int y = 0; y < world.getMaxHeight(); y++) {
 
-		}
+                org.bukkit.Location bukkitLocation =
+                        new org.bukkit.Location(world, chunk.getX() * 16 + x, y, chunk.getZ() * 16 + z);
+                Location worldEditLocation = BukkitAdapter.adapt(bukkitLocation);
+                ApplicableRegionSet set = query.getApplicableRegions(worldEditLocation);
 
-		@Override
-		public Set<ProtectedRegion> call() {
+                regions.addAll(set.getRegions());
+            }
 
-			Set<ProtectedRegion> regions = new HashSet<>();
-			World world = chunk.getWorld();
-
-			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-			RegionQuery query = container.createQuery();
-
-			for (int y = 0; y < world.getMaxHeight(); y++) {
-
-				org.bukkit.Location bukkitLocation = new org.bukkit.Location(world, chunk.getX() * 16 + x, y, chunk.getZ() * 16 + z);
-				Location worldEditLocation = BukkitAdapter.adapt(bukkitLocation);
-				ApplicableRegionSet set = query.getApplicableRegions(worldEditLocation);
-
-				regions.addAll(set.getRegions());
-
-			}
-
-			return regions;
-
-		}
-
-	}
-
+            return regions;
+        }
+    }
 }

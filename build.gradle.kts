@@ -14,21 +14,18 @@ java {
 }
 
 group = "me.realized.de"
+
 version = "1.4"
+
 val apiVersion = "1.19"
 
 tasks.named<ProcessResources>("processResources") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite duplicate files
-    val props = mapOf(
-        "version" to version,
-        "apiVersion" to apiVersion
-    )
+    val props = mapOf("version" to version, "apiVersion" to apiVersion)
 
     inputs.properties(props) // Indicates to rerun if version changes.
 
-    filesMatching("plugin.yml") {
-        expand(props)
-    }
+    filesMatching("plugin.yml") { expand(props) }
     from("LICENSE") { // Bundle license into .jars.
         into("/")
     }
@@ -42,36 +39,22 @@ repositories {
     mavenCentral()
     gradlePluginPortal()
     mavenLocal()
-    maven {
-        url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    }
-    maven {
-        url = uri("https://repo.purpurmc.org/snapshots")
-    }
-    maven {
-        url = uri("https://jitpack.io")
-    }
-    maven {
-        url = uri("https://maven.enginehub.org/repo/")
-    }
-    maven {
-        url = uri("file://${System.getProperty("user.home")}/.m2/repository")
-    }
+    maven { url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") }
+    maven { url = uri("https://repo.purpurmc.org/snapshots") }
+    maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://maven.enginehub.org/repo/") }
+    maven { url = uri("file://${System.getProperty("user.home")}/.m2/repository") }
     val customMavenLocal = System.getProperty("SELF_MAVEN_LOCAL_REPO")
     if (customMavenLocal != null) {
         val mavenLocalDir = file(customMavenLocal)
-	if (mavenLocalDir.isDirectory) {
-	    println("Using SELF_MAVEN_LOCAL_REPO at: $customMavenLocal")
-	    maven {
-	        url = uri("file://${mavenLocalDir.absolutePath}")
-	    }
-	}
-	else {
-	    logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
-	}
-    }
-    else {
-	logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
+        if (mavenLocalDir.isDirectory) {
+            println("Using SELF_MAVEN_LOCAL_REPO at: $customMavenLocal")
+            maven { url = uri("file://${mavenLocalDir.absolutePath}") }
+        } else {
+            logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
+        }
+    } else {
+        logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
     }
 }
 
@@ -83,10 +66,9 @@ dependencies {
     implementation("com.github.Realizedd.Duels:duels-api:3.4.1") // Import/Shade Duels API.
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.8") // Import WorldGuard API.
     compileOnly("io.github.miniplaceholders:miniplaceholders-api:2.2.3") // Import MiniPlaceholders API.
-    // Shade remapped APIs into final jar.
     implementation("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
     implementation("org.spigotmc:spigot:1.19.4-R0.1-SNAPSHOT")
-    compileOnly(project(":libs:Utilities-OG"))
+    compileOnlyApi(project(":libs:Utilities-OG"))
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible .jars
@@ -101,12 +83,11 @@ tasks.shadowJar {
 }
 
 tasks.build {
+    dependsOn(tasks.spotlessApply)
     dependsOn(tasks.shadowJar)
 }
 
-tasks.jar {
-    archiveClassifier.set("part")
-}
+tasks.jar { archiveClassifier.set("part") }
 
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-parameters")
@@ -122,3 +103,13 @@ java {
     }
 }
 
+spotless {
+    java {
+        removeUnusedImports()
+        palantirJavaFormat()
+    }
+    kotlinGradle {
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
+        target("build.gradle.kts", "settings.gradle.kts")
+    }
+}

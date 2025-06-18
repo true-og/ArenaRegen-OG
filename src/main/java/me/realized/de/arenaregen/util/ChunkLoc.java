@@ -1,72 +1,60 @@
 package me.realized.de.arenaregen.util;
 
 import java.util.Objects;
-
 import org.bukkit.Chunk;
 
 public class ChunkLoc {
 
-	private final int x, z;
+    private final int x, z;
 
-	public ChunkLoc(final int x, final int z) {
+    public ChunkLoc(final int x, final int z) {
 
-		this.x = x;
-		this.z = z;
+        this.x = x;
+        this.z = z;
+    }
 
-	}
+    public ChunkLoc(final Chunk chunk) {
 
-	public ChunkLoc(final Chunk chunk) {
+        this(chunk.getX(), chunk.getZ());
+    }
 
-		this(chunk.getX(), chunk.getZ());
+    public int getX() {
 
-	}
+        return x;
+    }
 
-	public int getX() {
+    public int getZ() {
 
-		return x;
+        return z;
+    }
 
-	}
+    @Override
+    public boolean equals(final Object o) {
 
-	public int getZ() {
+        if (this == o) {
 
-		return z;
+            return true;
+        }
 
-	}
+        if (o == null || getClass() != o.getClass()) {
 
-	@Override
-	public boolean equals(final Object o) {
+            return false;
+        }
 
-		if (this == o) {
+        final ChunkLoc chunkLoc = (ChunkLoc) o;
 
-			return true;
+        return x == chunkLoc.x && z == chunkLoc.z;
+    }
 
-		}
+    @Override
+    public int hashCode() {
 
-		if (o == null || getClass() != o.getClass()) {
+        return Objects.hash(x, z);
+    }
 
-			return false;
+    @Override
+    public String toString() {
 
-		}
-
-		final ChunkLoc chunkLoc = (ChunkLoc) o;
-
-		return x == chunkLoc.x && z == chunkLoc.z;
-
-	}
-
-	@Override
-	public int hashCode() {
-
-		return Objects.hash(x, z);
-
-	}
-
-	@Override
-	public String toString() {
-
-		return "{" + x + "," + z + "}";
-
-	}
-
-
+        return "{" + x + "," + z + "}";
+    }
 }

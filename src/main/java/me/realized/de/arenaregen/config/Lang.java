@@ -5,163 +5,138 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
+import me.realized.de.arenaregen.ArenaRegen;
+import me.realized.de.arenaregen.util.StringUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import me.realized.de.arenaregen.ArenaRegen;
-import me.realized.de.arenaregen.util.StringUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-
 public class Lang {
 
-	private static final String NAME = "lang.yml";
-	private final ArenaRegen extension;
+    private static final String NAME = "lang.yml";
+    private final ArenaRegen extension;
 
-	public static String getName() {
+    public static String getName() {
 
-		return NAME;
+        return NAME;
+    }
 
-	}
+    public ArenaRegen getExtension() {
 
-	public ArenaRegen getExtension() {
+        return extension;
+    }
 
-		return extension;
+    public Map<String, String> getMessages() {
 
-	}
+        return messages;
+    }
 
-	public Map<String, String> getMessages() {
+    private final Map<String, String> messages = new HashMap<>();
 
-		return messages;
+    public Lang(final ArenaRegen extension) {
 
-	}
+        this.extension = extension;
 
-	private final Map<String, String> messages = new HashMap<>();
+        final File file = new File(extension.getDataFolder(), NAME);
 
-	public Lang(final ArenaRegen extension) {
+        if (!file.exists()) {
 
-		this.extension = extension;
+            extension.saveResource(NAME);
+        }
 
-		final File file = new File(extension.getDataFolder(), NAME);
+        final FileConfiguration configuration = YamlConfiguration.loadConfiguration(file);
 
-		if (! file.exists()) {
+        final Map<String, String> strings = new HashMap<>();
 
-			extension.saveResource(NAME);
+        for (String key : configuration.getKeys(true)) {
 
-		}
+            final Object value = configuration.get(key);
 
-		final FileConfiguration configuration = YamlConfiguration.loadConfiguration(file);
+            if (value == null || value instanceof MemorySection) {
 
+                continue;
+            }
 
-		final Map<String, String> strings = new HashMap<>();
+            final String message = value instanceof List ? StringUtil.fromList((List<?>) value) : value.toString();
 
-		for (String key : configuration.getKeys(true)) {
+            if (key.startsWith("STRINGS")) {
 
-			final Object value = configuration.get(key);
+                final String[] args = key.split(Pattern.quote("."));
+                strings.put(args[args.length - 1], message);
 
-			if (value == null || value instanceof MemorySection) {
+            } else {
 
-				continue;
+                messages.put(key, message);
+            }
+        }
 
-			}
+        messages.replaceAll((key, value) -> {
+            for (final Map.Entry<String, String> entry : strings.entrySet()) {
 
-			final String message = value instanceof List ? StringUtil.fromList((List<?>) value) : value.toString();
+                final String placeholder = "{" + entry.getKey() + "}";
 
-			if (key.startsWith("STRINGS")) {
+                if (StringUtils.containsIgnoreCase(value, placeholder)) {
 
-				final String[] args = key.split(Pattern.quote("."));
-				strings.put(args[args.length - 1], message);
+                    value = value.replaceAll("(?i)" + Pattern.quote(placeholder), entry.getValue());
+                }
+            }
 
-			}
-			else {
+            return value;
+        });
+    }
 
-				messages.put(key, message);
+    private String getRawMessage(final String key) {
 
-			}
+        final String message = messages.get(key);
 
-		}
+        if (message == null) {
 
-		messages.replaceAll((key, value) -> {
+            extension.error("Failed to load message: provided key '" + key + "' has no assigned value");
 
-			for (final Map.Entry<String, String> entry : strings.entrySet()) {
+            return null;
+        }
 
-				final String placeholder = "{" + entry.getKey() + "}";
+        // Allow disabling any message by setting it to ''
+        return !message.isEmpty() ? message : null;
+    }
 
-				if (StringUtils.containsIgnoreCase(value, placeholder)) {
+    private String replace(String message, Object... replacers) {
 
-					value = value.replaceAll("(?i)" + Pattern.quote(placeholder), entry.getValue());
+        if (replacers.length == 1 && replacers[0] instanceof Object[]) {
 
-				}
+            replacers = (Object[]) replacers[0];
+        }
 
-			}
+        for (int i = 0; i < replacers.length; i += 2) {
 
-			return value;
+            if (i + 1 >= replacers.length) {
 
-		});
+                break;
+            }
 
-	}
+            message = message.replace("%" + replacers[i].toString() + "%", String.valueOf(replacers[i + 1]));
+        }
 
-	private String getRawMessage(final String key) {
+        return message;
+    }
 
-		final String message = messages.get(key);
+    public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
 
-		if (message == null) {
+        final String message = getRawMessage(key);
 
-			extension.error("Failed to load message: provided key '" + key + "' has no assigned value");
+        if (message == null) {
 
-			return null;
+            return;
+        }
 
-		}
+        // Replacing StringUtil.color with LegacyComponentSerializer (case sensitive).
+        String replacedMessage = replace(message, replacers);
+        Component coloredMessage = LegacyComponentSerializer.legacyAmpersand().deserialize(replacedMessage);
 
-		// Allow disabling any message by setting it to ''
-		return ! message.isEmpty() ? message : null;
-
-	}
-
-	private String replace(String message, Object... replacers) {
-
-		if (replacers.length == 1 && replacers[0] instanceof Object[]) {
-
-			replacers = (Object[]) replacers[0];
-
-		}
-
-		for (int i = 0; i < replacers.length; i += 2) {
-
-			if (i + 1 >= replacers.length) {
-
-				break;
-
-			}
-
-			message = message.replace("%" + replacers[i].toString() + "%", String.valueOf(replacers[i + 1]));
-
-		}
-
-		return message;
-
-	}
-
-	public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
-
-		final String message = getRawMessage(key);
-
-		if (message == null) {
-
-			return;
-
-		}
-
-		// Replacing StringUtil.color with LegacyComponentSerializer (case sensitive).
-		String replacedMessage = replace(message, replacers);
-		Component coloredMessage = LegacyComponentSerializer.legacyAmpersand().deserialize(replacedMessage);
-
-		receiver.sendMessage(coloredMessage);
-
-	}
-
+        receiver.sendMessage(coloredMessage);
+    }
 }

@@ -4,37 +4,31 @@ import org.bukkit.Location;
 
 public class Selection {
 
-	private Location first;
-	private Location second;
+    private Location first;
+    private Location second;
 
-	public Location getFirst() {
+    public Location getFirst() {
 
-		return first;
+        return first;
+    }
 
-	}
+    public void setFirst(Location first) {
 
-	public void setFirst(Location first) {
+        this.first = first;
+    }
 
-		this.first = first;
+    public Location getSecond() {
 
-	}
+        return second;
+    }
 
-	public Location getSecond() {
+    public void setSecond(Location second) {
 
-		return second;
+        this.second = second;
+    }
 
-	}
+    public boolean isSelected() {
 
-	public void setSecond(Location second) {
-
-		this.second = second;
-
-	}
-
-	public boolean isSelected() {
-
-		return first != null && second != null;
-
-	}
-
+        return first != null && second != null;
+    }
 }

@@ -5,7 +5,6 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
-
 import me.realized.de.arenaregen.command.ArenaregenCommand;
 import me.realized.de.arenaregen.config.Config;
 import me.realized.de.arenaregen.config.Lang;
@@ -16,128 +15,110 @@ import me.realized.duels.api.extension.DuelsExtension;
 
 public class ArenaRegen extends DuelsExtension {
 
-	private Config configuration;
-	private Lang lang;
-	private SelectionManager selectionManager;
-	private ZoneManager zoneManager;
-	public static StateFlag DUELS_ARENA = new StateFlag("duels-arena", false);
+    private Config configuration;
+    private Lang lang;
+    private SelectionManager selectionManager;
+    private ZoneManager zoneManager;
+    public static StateFlag DUELS_ARENA = new StateFlag("duels-arena", false);
 
-	public Config getConfiguration() {
+    public Config getConfiguration() {
 
-		return configuration;
+        return configuration;
+    }
 
-	}
+    public Lang getLang() {
 
-	public Lang getLang() {
+        return lang;
+    }
 
-		return lang;
+    public void setLang(Lang lang) {
 
-	}
+        this.lang = lang;
+    }
 
-	public void setLang(Lang lang) {
+    public SelectionManager getSelectionManager() {
 
-		this.lang = lang;
+        return selectionManager;
+    }
 
-	}
+    public ZoneManager getZoneManager() {
 
-	public SelectionManager getSelectionManager() {
+        return zoneManager;
+    }
 
-		return selectionManager;
+    @Override
+    public void onEnable() {
 
-	}
+        this.configuration = new Config(this);
 
-	public ZoneManager getZoneManager() {
+        if (configuration.isTrackBlockChanges() && configuration.isAllowArenaBlockBreak()) {
 
-		return zoneManager;
+            warn(
+                    "The config options 'track-block-changes' and 'allow-arena-block-break' are incompatible with each other.");
+        }
 
-	}
+        this.lang = new Lang(this);
 
-	@Override
-	public void onEnable() {
+        registerCustomFlag();
 
-		this.configuration = new Config(this);
+        info("NMSHandler: Using " + getHandler().getClass().getName());
 
-		if (configuration.isTrackBlockChanges() && configuration.isAllowArenaBlockBreak()) {
+        this.selectionManager = new SelectionManager(this, api);
+        this.zoneManager = new ZoneManager(this, api);
 
-			warn("The config options 'track-block-changes' and 'allow-arena-block-break' are incompatible with each other.");
+        api.registerSubCommand("duels", new ArenaregenCommand(this, api));
+    }
 
-		}
+    private void registerCustomFlag() {
 
-		this.lang = new Lang(this);
+        FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
+        try {
 
-		registerCustomFlag();
+            registry.register(DUELS_ARENA);
 
-		info("NMSHandler: Using " + getHandler().getClass().getName());
+        } catch (FlagConflictException error) {
 
-		this.selectionManager = new SelectionManager(this, api);
-		this.zoneManager = new ZoneManager(this, api);
+            Flag<?> existing = registry.get("duels-arena");
+            if (existing instanceof StateFlag) {
 
-		api.registerSubCommand("duels", new ArenaregenCommand(this, api));
+                // Use the existing flag.
+                DUELS_ARENA = (StateFlag) existing;
 
-	}
+            } else {
 
-	private void registerCustomFlag() {
+                warn("Conflict with an existing flag!");
+            }
+        }
+    }
 
-		FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
-		try {
+    public NMSHandler getHandler() {
 
-			registry.register(DUELS_ARENA);
+        return new NMSHandler();
+    }
 
-		}
-		catch (FlagConflictException error) {
+    @Override
+    public void onDisable() {
 
-			Flag<?> existing = registry.get("duels-arena");
-			if (existing instanceof StateFlag) {
+        zoneManager.handleDisable();
+    }
 
-				// Use the existing flag.
-				DUELS_ARENA = (StateFlag) existing;
+    public void info(final String s) {
 
-			}
-			else {
+        api.info("[" + getName() + " Extension] " + s);
+    }
 
-				warn("Conflict with an existing flag!");
+    public void warn(final String s) {
 
-			}
+        api.warn("[" + getName() + " Extension] " + s);
+    }
 
-		}
+    public void error(final String s) {
 
-	}
+        api.error("[" + getName() + " Extension] " + s);
+    }
 
-	public NMSHandler getHandler() {
+    public void error(final String s, final Throwable thrown) {
 
-		return new NMSHandler();
-
-	}
-
-	@Override
-	public void onDisable() {
-
-		zoneManager.handleDisable();
-
-	}
-
-	public void info(final String s) {
-
-		api.info("[" + getName() + " Extension] " + s);
-
-	}
-
-	public void warn(final String s) {
-
-		api.warn("[" + getName() + " Extension] " + s);
-
-	}
-
-	public void error(final String s) {
-
-		api.error("[" + getName() + " Extension] " + s);
-
-	}
-
-	public void error(final String s, final Throwable thrown) {
-
-		api.error("[" + getName() + " Extension] " + s, thrown);
-
-	}
-
+        api.error("[" + getName() + " Extension] " + s, thrown);
+    }
 }
