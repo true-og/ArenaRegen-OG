@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.apache.tools.ant.filters.ReplaceTokens
 
-tasks.named<Delete>("clean") { delete("$rootDir/out/") }
+tasks.named<Delete>("clean") { delete("$rootDir/build/libs/") }
 
 tasks.named<org.gradle.api.tasks.Copy>("processResources") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -29,8 +29,8 @@ dependencies {
 }
 
 tasks.named<ShadowJar>("shadowJar") {
-    destinationDirectory.set(layout.buildDirectory.dir("../../out"))
-    archiveFileName.set("${project.name}-${project.version}.jar")
+    destinationDirectory.set(layout.buildDirectory.dir("../../build/libs/"))
+    archiveFileName.set("ArenaRegen-OG-${project.version}.jar")
     dependencies {
         include(project(":nms"))
         include(project(":v1_8_R3"))
