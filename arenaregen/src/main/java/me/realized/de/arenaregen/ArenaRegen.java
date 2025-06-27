@@ -16,12 +16,16 @@ public class ArenaRegen extends DuelsExtension {
 
     @Getter
     private Config configuration;
+
     @Getter
     private Lang lang;
+
     @Getter
     private NMS handler;
+
     @Getter
     private SelectionManager selectionManager;
+
     @Getter
     private ZoneManager zoneManager;
 
@@ -30,7 +34,8 @@ public class ArenaRegen extends DuelsExtension {
         this.configuration = new Config(this);
 
         if (configuration.isTrackBlockChanges() && configuration.isAllowArenaBlockBreak()) {
-            warn("The config options 'track-block-changes' and 'allow-arena-block-break' are incompatible with each other.");
+            warn(
+                    "The config options 'track-block-changes' and 'allow-arena-block-break' are incompatible with each other.");
         }
 
         this.lang = new Lang(this);
@@ -60,7 +65,8 @@ public class ArenaRegen extends DuelsExtension {
             Class<?> clazz = null;
 
             if (CompatUtil.isPaper()) {
-                clazz = ReflectionUtil.getClassUnsafe("me.realized.de.arenaregen.nms." + version + "_paper" + ".NMSHandler");
+                clazz = ReflectionUtil.getClassUnsafe(
+                        "me.realized.de.arenaregen.nms." + version + "_paper" + ".NMSHandler");
             }
 
             if (clazz == null) {

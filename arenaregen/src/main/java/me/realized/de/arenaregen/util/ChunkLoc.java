@@ -1,10 +1,8 @@
 package me.realized.de.arenaregen.util;
 
 import java.util.Objects;
-
-import org.bukkit.Chunk;
-
 import lombok.Getter;
+import org.bukkit.Chunk;
 
 public class ChunkLoc {
 
@@ -22,8 +20,12 @@ public class ChunkLoc {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) { return true; }
-        if (o == null || getClass() != o.getClass()) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final ChunkLoc chunkLoc = (ChunkLoc) o;
         return x == chunkLoc.x && z == chunkLoc.z;
     }

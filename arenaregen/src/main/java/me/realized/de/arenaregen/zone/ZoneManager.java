@@ -38,7 +38,7 @@ public class ZoneManager {
             for (final File file : files) {
                 final String name = file.getName().substring(0, file.getName().lastIndexOf("."));
                 final Arena arena = arenaManager.get(name);
-                
+
                 if (arena == null) {
                     file.delete();
                     continue;
@@ -54,19 +54,21 @@ public class ZoneManager {
     }
 
     public void handleDisable() {
-        zones.values().stream().filter(zone -> zone.getArena().isUsed() || zone.isResetting()).forEach(zone -> {
-            zone.getArena().setDisabled(false);
+        zones.values().stream()
+                .filter(zone -> zone.getArena().isUsed() || zone.isResetting())
+                .forEach(zone -> {
+                    zone.getArena().setDisabled(false);
 
-            if (zone.isResetting()) { 
-                zone.getTask().cancel();
-            }
+                    if (zone.isResetting()) {
+                        zone.getTask().cancel();
+                    }
 
-            try {
-                zone.resetInstant();
-            } catch (Exception ex) {
-                extension.error("Could not reset zone '" + zone.getName() + "'!", ex);
-            }
-        });
+                    try {
+                        zone.resetInstant();
+                    } catch (Exception ex) {
+                        extension.error("Could not reset zone '" + zone.getName() + "'!", ex);
+                    }
+                });
     }
 
     public Zone get(final String name) {
@@ -83,7 +85,10 @@ public class ZoneManager {
     }
 
     public Zone get(final Block block) {
-        return zones.values().stream().filter(any -> any.contains(block)).findFirst().orElse(null);
+        return zones.values().stream()
+                .filter(any -> any.contains(block))
+                .findFirst()
+                .orElse(null);
     }
 
     public boolean create(final Arena arena, final Selection selection) {

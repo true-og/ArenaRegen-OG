@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.util.BlockInfo;
 import me.realized.de.arenaregen.util.Callback;
@@ -22,7 +21,12 @@ public class FilterBlocksTask extends Task {
 
     private final Set<Position> changedBlocks;
 
-    public FilterBlocksTask(Logger logger, final ArenaRegen extension, final Zone zone, final Callback onDone, final Set<Position> changedBlocks) {
+    public FilterBlocksTask(
+            Logger logger,
+            final ArenaRegen extension,
+            final Zone zone,
+            final Callback onDone,
+            final Set<Position> changedBlocks) {
         super(logger, extension, zone, onDone);
         this.changedBlocks = changedBlocks;
     }
@@ -42,11 +46,13 @@ public class FilterBlocksTask extends Task {
             while ((block = reader.readLine()) != null) {
                 final String[] data = block.split(":");
                 final String[] posData = data[0].split(";");
-                final Position pos = new Position(Integer.parseInt(posData[0]), Integer.parseInt(posData[1]), Integer.parseInt(posData[2]));
+                final Position pos = new Position(
+                        Integer.parseInt(posData[0]), Integer.parseInt(posData[1]), Integer.parseInt(posData[2]));
 
                 if (changedBlocks.contains(pos)) {
                     final String[] blockData = data[1].split(";");
-                    final BlockInfo info = new BlockInfo(Material.getMaterial(blockData[0]), Byte.parseByte(blockData[1]));
+                    final BlockInfo info =
+                            new BlockInfo(Material.getMaterial(blockData[0]), Byte.parseByte(blockData[1]));
                     changes.add(new Pair<>(pos, info));
                     changedBlocks.remove(pos);
                 }

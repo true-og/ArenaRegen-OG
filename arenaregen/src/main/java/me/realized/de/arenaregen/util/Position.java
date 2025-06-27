@@ -17,7 +17,10 @@ public class Position {
     }
 
     public Position(final BlockState state) {
-        this(state.getLocation().getBlockX(), state.getLocation().getBlockY(), state.getLocation().getBlockZ());
+        this(
+                state.getLocation().getBlockX(),
+                state.getLocation().getBlockY(),
+                state.getLocation().getBlockZ());
     }
 
     public Position(final Block block) {
@@ -26,8 +29,12 @@ public class Position {
 
     @Override
     public boolean equals(final Object other) {
-        if (this == other) { return true; }
-        if (other == null || getClass() != other.getClass()) { return false; }
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
         final Position position = (Position) other;
         return x == position.x && y == position.y && z == position.z;
     }

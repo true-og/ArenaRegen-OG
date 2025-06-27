@@ -31,7 +31,6 @@ public class Lang {
 
         final FileConfiguration configuration = YamlConfiguration.loadConfiguration(file);
 
-
         final Map<String, String> strings = new HashMap<>();
 
         for (String key : configuration.getKeys(true)) {

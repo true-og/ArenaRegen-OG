@@ -24,8 +24,17 @@ public class ListCommand extends ARCommand {
         }
 
         lang.sendMessage(sender, "COMMAND.arenaregen.list.header");
-        zones.forEach(zone -> lang.sendMessage(sender, "COMMAND.arenaregen.list.format",
-            "name", zone.getName(), "min_pos", StringUtil.from(zone.getMin()), "max_pos", StringUtil.from(zone.getMax()), "blocks_count", zone.getTotalBlocks()));
+        zones.forEach(zone -> lang.sendMessage(
+                sender,
+                "COMMAND.arenaregen.list.format",
+                "name",
+                zone.getName(),
+                "min_pos",
+                StringUtil.from(zone.getMin()),
+                "max_pos",
+                StringUtil.from(zone.getMax()),
+                "blocks_count",
+                zone.getTotalBlocks()));
         lang.sendMessage(sender, "COMMAND.arenaregen.list.footer", "zones_count", zones.size());
     }
 }

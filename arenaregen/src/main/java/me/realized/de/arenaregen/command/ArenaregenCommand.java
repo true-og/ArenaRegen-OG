@@ -26,11 +26,10 @@ public class ArenaregenCommand extends SubCommand {
         this.lang = extension.getLang();
 
         register(
-            new CreateCommand(extension, api),
-            new DeleteCommand(extension, api),
-            new ResetCommand(extension, api),
-            new ListCommand(extension, api)
-        );
+                new CreateCommand(extension, api),
+                new DeleteCommand(extension, api),
+                new ResetCommand(extension, api),
+                new ListCommand(extension, api));
     }
 
     private void register(final ARCommand... commands) {
@@ -57,7 +56,15 @@ public class ArenaregenCommand extends SubCommand {
             }
 
             if (args.length < command.getLength()) {
-                lang.sendMessage(sender, "COMMAND.sub-command-usage", "command", cmdName, "usage", command.getUsage(), "description", command.getDescription());
+                lang.sendMessage(
+                        sender,
+                        "COMMAND.sub-command-usage",
+                        "command",
+                        cmdName,
+                        "usage",
+                        command.getUsage(),
+                        "description",
+                        command.getDescription());
                 return;
             }
 

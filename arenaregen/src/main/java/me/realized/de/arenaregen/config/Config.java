@@ -11,26 +11,37 @@ public class Config {
 
     @Getter
     private final Material selectingTool;
+
     @Getter
     private final boolean trackBlockChanges;
+
     @Getter
     private final int blocksPerTick;
+
     @Getter
     private final boolean allowArenaBlockBreak;
+
     @Getter
     private final String blockResetHandlerVersion;
+
     @Getter
     private final boolean removeDroppedItems;
+
     @Getter
     private final List<String> removeEntities;
+
     @Getter
     private final boolean preventBlockBurn;
+
     @Getter
     private final boolean preventBlockMelt;
+
     @Getter
     private final boolean preventBlockExplode;
+
     @Getter
     private final boolean preventFireSpread;
+
     @Getter
     private final boolean preventLeafDecay;
 
@@ -42,7 +53,9 @@ public class Config {
         this.blocksPerTick = config.getInt("blocks-per-tick", 25);
         this.blockResetHandlerVersion = config.getString("block-reset-handler-version", "auto");
         this.removeDroppedItems = config.getBoolean("remove-dropped-items", true);
-        this.removeEntities = config.isList("remove-entities") ? config.getStringList("remove-entities") : Collections.singletonList("ENDER_CRYSTAL");
+        this.removeEntities = config.isList("remove-entities")
+                ? config.getStringList("remove-entities")
+                : Collections.singletonList("ENDER_CRYSTAL");
         this.preventBlockBurn = config.getBoolean("prevent-block-burn", true);
         this.preventBlockMelt = config.getBoolean("prevent-block-melt", true);
         this.preventBlockExplode = config.getBoolean("prevent-block-explode", true);

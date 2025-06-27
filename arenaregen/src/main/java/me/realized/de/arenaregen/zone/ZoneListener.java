@@ -4,7 +4,6 @@ import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.config.Config;
 import me.realized.de.arenaregen.config.Lang;
 import me.realized.de.arenaregen.util.ChunkLoc;
-import me.realized.de.arenaregen.util.CompatUtil;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.event.arena.ArenaRemoveEvent;
 import me.realized.duels.api.event.match.MatchEndEvent;
@@ -42,22 +41,18 @@ public class ZoneListener implements Listener {
         this.lang = extension.getLang();
         this.zoneManager = zoneManager;
     }
-    
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final ChunkUnloadEvent event) {
         for (final Entity entity : event.getChunk().getEntities()) {
-            if (!(entity instanceof Item) && !config.getRemoveEntities().contains(entity.getType().name().toUpperCase())) {
+            if (!(entity instanceof Item)
+                    && !config.getRemoveEntities()
+                            .contains(entity.getType().name().toUpperCase())) {
                 continue;
             }
-
             entity.remove();
         }
-
-        if (!CompatUtil.isPaper() && zoneManager.getZones().stream().anyMatch(zone -> zone.isResetting() && zone.contains(event.getChunk()))) {
-            event.setCancelled(true);
-        }
     }
-
 
     @EventHandler
     public void on(final MatchEndEvent event) {
@@ -72,7 +67,9 @@ public class ZoneListener implements Listener {
             final Chunk chunk = zone.getWorld().getChunkAt(chunkLoc.getX(), chunkLoc.getZ());
 
             for (final Entity entity : chunk.getEntities()) {
-                if (!(entity instanceof Item) && !config.getRemoveEntities().contains(entity.getType().name().toUpperCase())) {
+                if (!(entity instanceof Item)
+                        && !config.getRemoveEntities()
+                                .contains(entity.getType().name().toUpperCase())) {
                     continue;
                 }
 
@@ -83,12 +80,10 @@ public class ZoneListener implements Listener {
         zone.reset();
     }
 
-
     @EventHandler
     public void on(final ArenaRemoveEvent event) {
         zoneManager.remove(event.getArena().getName());
     }
-
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final BlockBreakEvent event) {
@@ -112,7 +107,6 @@ public class ZoneListener implements Listener {
         lang.sendMessage(player, "ERROR.cancel-arena-block-break");
     }
 
-
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final BlockPlaceEvent event) {
         if (!config.isTrackBlockChanges()) {
@@ -128,7 +122,6 @@ public class ZoneListener implements Listener {
 
         zone.track(event.getBlock());
     }
-
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final BlockFadeEvent event) {
@@ -176,7 +169,6 @@ public class ZoneListener implements Listener {
         event.setCancelled(true);
     }
 
-
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final EntityExplodeEvent event) {
         final Zone zone = zoneManager.get(event.getEntity().getLocation().getBlock());
@@ -195,7 +187,6 @@ public class ZoneListener implements Listener {
 
         event.setCancelled(true);
     }
-
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final BlockExplodeEvent event) {
@@ -217,7 +208,6 @@ public class ZoneListener implements Listener {
         event.setCancelled(true);
     }
 
-    
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final BlockIgniteEvent event) {
         final Block block = event.getBlock();
@@ -230,7 +220,7 @@ public class ZoneListener implements Listener {
         if (config.isTrackBlockChanges()) {
             zone.track(block);
         }
-        
+
         if (!config.isPreventFireSpread() || event.getCause() != IgniteCause.SPREAD) {
             return;
         }
@@ -238,7 +228,6 @@ public class ZoneListener implements Listener {
         event.setCancelled(true);
     }
 
-    
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final LeavesDecayEvent event) {
         final Block block = event.getBlock();
@@ -251,7 +240,7 @@ public class ZoneListener implements Listener {
         if (config.isTrackBlockChanges()) {
             zone.track(event.getBlock());
         }
-        
+
         if (!config.isPreventLeafDecay()) {
             return;
         }
@@ -259,13 +248,12 @@ public class ZoneListener implements Listener {
         event.setCancelled(true);
     }
 
-    
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final BlockPhysicsEvent event) {
         if (!config.isTrackBlockChanges()) {
             return;
         }
-        
+
         final Block block = event.getBlock();
         final Zone zone = zoneManager.get(block);
 
@@ -276,13 +264,12 @@ public class ZoneListener implements Listener {
         zone.track(event.getBlock());
     }
 
-    
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final BlockGrowEvent event) {
         if (!config.isTrackBlockChanges()) {
             return;
         }
-        
+
         final Block block = event.getBlock();
         final Zone zone = zoneManager.get(block);
 
@@ -293,13 +280,12 @@ public class ZoneListener implements Listener {
         zone.track(event.getBlock());
     }
 
-    
     @EventHandler(priority = EventPriority.LOWEST)
     public void on(final BlockFromToEvent event) {
         if (!config.isTrackBlockChanges()) {
             return;
         }
-        
+
         final Block block = event.getBlock();
         final Zone zone = zoneManager.get(block);
 

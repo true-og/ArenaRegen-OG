@@ -22,14 +22,16 @@ public class NMSHandler implements NMS {
     public void sendChunkUpdate(final Player player, final Chunk chunk) {}
 
     @Override
-    public void setBlockFast(final World world, final int x, final int y, final int z, final int data, final Material material) {
+    public void setBlockFast(
+            final World world, final int x, final int y, final int z, final int data, final Material material) {
         final Block block = world.getBlockAt(x, y, z);
         block.setType(material);
 
         if (SET_DATA != null) {
             try {
                 SET_DATA.invoke(block, (byte) data);
-            } catch (IllegalAccessException | InvocationTargetException ignored) {}
+            } catch (IllegalAccessException | InvocationTargetException ignored) {
+            }
         }
     }
 

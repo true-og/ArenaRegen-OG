@@ -18,16 +18,27 @@ public abstract class ARCommand {
 
     @Getter
     private final String name;
+
     @Getter
     private final String usage;
+
     @Getter
     private final String description;
+
     @Getter
     private final int length;
+
     @Getter
     private final boolean playerOnly;
 
-    protected ARCommand(final ArenaRegen extension, final Duels api, final String name, final String usage, final String description, final int length, final boolean playerOnly) {
+    protected ARCommand(
+            final ArenaRegen extension,
+            final Duels api,
+            final String name,
+            final String usage,
+            final String description,
+            final int length,
+            final boolean playerOnly) {
         this.arenaManager = api.getArenaManager();
         this.lang = extension.getLang();
         this.selectionManager = extension.getSelectionManager();

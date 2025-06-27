@@ -1,13 +1,12 @@
 package me.realized.de.arenaregen.util;
 
 import java.util.function.Consumer;
-
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 public final class BlockUtil {
-    
+
     public static boolean isSurrounded(final Block block) {
         final Block east = block.getRelative(BlockFace.EAST);
         final Block west = block.getRelative(BlockFace.WEST);
@@ -16,11 +15,11 @@ public final class BlockUtil {
         final Block up = block.getRelative(BlockFace.UP);
         final Block down = block.getRelative(BlockFace.DOWN);
         return !east.getType().isTransparent()
-            && !west.getType().isTransparent()
-            && !up.getType().isTransparent()
-            && !down.getType().isTransparent()
-            && !south.getType().isTransparent()
-            && !north.getType().isTransparent();
+                && !west.getType().isTransparent()
+                && !up.getType().isTransparent()
+                && !down.getType().isTransparent()
+                && !south.getType().isTransparent()
+                && !north.getType().isTransparent();
     }
 
     public static void runForCuboid(final Location min, final Location max, final Consumer<Block> consumer) {
@@ -34,5 +33,4 @@ public final class BlockUtil {
     }
 
     private BlockUtil() {}
-    
 }

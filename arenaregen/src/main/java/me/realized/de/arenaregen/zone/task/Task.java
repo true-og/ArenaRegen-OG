@@ -1,15 +1,13 @@
 package me.realized.de.arenaregen.zone.task;
 
-import org.bukkit.scheduler.BukkitRunnable;
-
+import java.util.logging.Logger;
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.config.Config;
 import me.realized.de.arenaregen.nms.NMS;
 import me.realized.de.arenaregen.util.Callback;
 import me.realized.de.arenaregen.zone.Zone;
 import me.realized.duels.api.Duels;
-
-import java.util.logging.Logger;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public abstract class Task extends BukkitRunnable {
 

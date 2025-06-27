@@ -9,8 +9,11 @@ public final class CompatUtil {
 
     static {
         final String packageName = Bukkit.getServer().getClass().getPackage().getName();
-        SUB_VERSION = NumberUtil.parseInt(packageName.substring(packageName.lastIndexOf('.') + 1).split("_")[1]).orElse(0);
-        PAPER_SPIGOT = ReflectionUtil.getClassUnsafe("com.destroystokyo.paper.PaperConfig") != null || ReflectionUtil.getClassUnsafe("org.github.paperspigot.PaperSpigotConfig") != null;
+        SUB_VERSION = NumberUtil.parseInt(
+                        packageName.substring(packageName.lastIndexOf('.') + 1).split("_")[1])
+                .orElse(0);
+        PAPER_SPIGOT = ReflectionUtil.getClassUnsafe("com.destroystokyo.paper.PaperConfig") != null
+                || ReflectionUtil.getClassUnsafe("org.github.paperspigot.PaperSpigotConfig") != null;
     }
 
     private CompatUtil() {}

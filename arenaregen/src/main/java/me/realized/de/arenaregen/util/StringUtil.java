@@ -11,7 +11,8 @@ public final class StringUtil {
     }
 
     public static String from(final Location location) {
-        return "(" + location.getWorld().getName() + ", " + location.getX() + ", " + location.getY() + ", " + location.getZ() + ")";
+        return "(" + location.getWorld().getName() + ", " + location.getX() + ", " + location.getY() + ", "
+                + location.getZ() + ")";
     }
 
     public static String fromList(final List<?> list) {
@@ -25,7 +26,6 @@ public final class StringUtil {
 
         return builder.toString();
     }
-
 
     private StringUtil() {}
 }

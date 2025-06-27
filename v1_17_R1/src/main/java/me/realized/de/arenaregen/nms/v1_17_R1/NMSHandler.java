@@ -21,7 +21,13 @@ public class NMSHandler implements NMS {
     }
 
     @Override
-    public void setBlockFast(final org.bukkit.World world, final int x, final int y, final int z, final int data, final Material material) {
+    public void setBlockFast(
+            final org.bukkit.World world,
+            final int x,
+            final int y,
+            final int z,
+            final int data,
+            final Material material) {
         final BlockPosition position = new BlockPosition(x, y, z);
         final Chunk chunk = ((CraftChunk) world.getChunkAt(x >> 4, z >> 4)).getHandle();
         final net.minecraft.world.level.block.Block block = CraftMagicNumbers.getBlock(material);

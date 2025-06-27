@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 
 public final class ReflectionUtil {
 
-    private final static String VERSION;
+    private static final String VERSION;
 
     static {
         VERSION = Bukkit.getServer().getClass().getName().split("\\.")[3];

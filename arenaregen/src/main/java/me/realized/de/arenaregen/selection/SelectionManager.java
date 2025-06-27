@@ -30,7 +30,6 @@ public class SelectionManager {
         api.registerListener(new SelectionListener());
     }
 
-
     public Selection get(final Player player) {
         return selections.get(player.getUniqueId());
     }

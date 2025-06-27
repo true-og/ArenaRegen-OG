@@ -6,6 +6,7 @@ public final class Pair<K, V> {
 
     @Getter
     private final K key;
+
     @Getter
     private final V value;
 

@@ -3,7 +3,6 @@ package me.realized.de.arenaregen.zone.task.tasks;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Logger;
-
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.util.BlockInfo;
 import me.realized.de.arenaregen.util.Callback;
@@ -16,9 +15,9 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 public class ScanBlocksTask extends Task {
-    
+
     private final Queue<Pair<Position, BlockInfo>> changed = new LinkedList<>();
-    
+
     private final Location min, max;
 
     private int x;

@@ -9,6 +9,7 @@ public class BlockInfo {
 
     @Getter
     private final Material type;
+
     @Getter
     private final byte data;
 

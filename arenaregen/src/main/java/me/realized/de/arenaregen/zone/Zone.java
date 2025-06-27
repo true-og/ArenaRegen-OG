@@ -1,5 +1,8 @@
 package me.realized.de.arenaregen.zone;
 
+import java.io.*;
+import java.util.*;
+import java.util.logging.Logger;
 import lombok.Getter;
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.config.Config;
@@ -16,21 +19,20 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-
 public class Zone {
 
     @Getter
     private final Duels api;
+
     private final ArenaRegen extension;
     private final NMS handler;
 
     @Getter
     private final Config config;
+
     @Getter
     private final Arena arena;
+
     @Getter
     private Location min, max;
 
@@ -48,12 +50,18 @@ public class Zone {
     @Getter
     private final Set<ChunkLoc> chunks = new HashSet<>();
 
-//    @Getter
-//    private final List<Entity> spawnedEntities = new ArrayList<>();
+    //    @Getter
+    //    private final List<Entity> spawnedEntities = new ArrayList<>();
 
     private Set<Position> changedBlocks = new HashSet<>();
 
-    Zone(final ArenaRegen extension, final Duels api, final Arena arena, final File folder, final Location first, final Location second) {
+    Zone(
+            final ArenaRegen extension,
+            final Duels api,
+            final Arena arena,
+            final File folder,
+            final Location first,
+            final Location second) {
         this.api = api;
         this.extension = extension;
         this.handler = extension.getHandler();
@@ -65,15 +73,12 @@ public class Zone {
                 first.getWorld(),
                 Math.min(first.getBlockX(), second.getBlockX()),
                 Math.min(first.getBlockY(), second.getBlockY()),
-                Math.min(first.getBlockZ(), second.getBlockZ())
-        );
+                Math.min(first.getBlockZ(), second.getBlockZ()));
         this.max = new Location(
                 first.getWorld(),
                 Math.max(first.getBlockX(), second.getBlockX()),
                 Math.max(first.getBlockY(), second.getBlockY()),
-                Math.max(first.getBlockZ(), second.getBlockZ())
-        );
-
+                Math.max(first.getBlockZ(), second.getBlockZ()));
 
         final Map<Position, BlockInfo> blocks = new HashMap<>();
 
@@ -173,8 +178,16 @@ public class Zone {
                 throw new NullPointerException("worldName or world is null");
             }
 
-            this.min = new Location(world, Integer.parseInt(reader.readLine()), Integer.parseInt(reader.readLine()), Integer.parseInt(reader.readLine()));
-            this.max = new Location(world, Integer.parseInt(reader.readLine()), Integer.parseInt(reader.readLine()), Integer.parseInt(reader.readLine()));
+            this.min = new Location(
+                    world,
+                    Integer.parseInt(reader.readLine()),
+                    Integer.parseInt(reader.readLine()),
+                    Integer.parseInt(reader.readLine()));
+            this.max = new Location(
+                    world,
+                    Integer.parseInt(reader.readLine()),
+                    Integer.parseInt(reader.readLine()),
+                    Integer.parseInt(reader.readLine()));
         }
 
         if (!config.isTrackBlockChanges()) {
@@ -198,7 +211,8 @@ public class Zone {
             while ((block = reader.readLine()) != null) {
                 final String[] data = block.split(":");
                 final String[] posData = data[0].split(";");
-                final Position pos = new Position(Integer.parseInt(posData[0]), Integer.parseInt(posData[1]), Integer.parseInt(posData[2]));
+                final Position pos = new Position(
+                        Integer.parseInt(posData[0]), Integer.parseInt(posData[1]), Integer.parseInt(posData[2]));
                 final String[] blockData = data[1].split(";");
                 final BlockInfo info = new BlockInfo(Material.getMaterial(blockData[0]), Byte.parseByte(blockData[1]));
                 blocks.put(pos, info);
@@ -301,9 +315,12 @@ public class Zone {
 
     public boolean contains(final Location location) {
         return min.getWorld().equals(location.getWorld())
-                && min.getBlockX() <= location.getBlockX() && location.getBlockX() <= max.getBlockX()
-                && min.getBlockY() <= location.getBlockY() && location.getBlockY() <= max.getBlockY()
-                && min.getBlockZ() <= location.getBlockZ() && location.getBlockZ() <= max.getBlockZ();
+                && min.getBlockX() <= location.getBlockX()
+                && location.getBlockX() <= max.getBlockX()
+                && min.getBlockY() <= location.getBlockY()
+                && location.getBlockY() <= max.getBlockY()
+                && min.getBlockZ() <= location.getBlockZ()
+                && location.getBlockZ() <= max.getBlockZ();
     }
 
     public boolean contains(final Block block) {

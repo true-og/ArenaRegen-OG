@@ -1,5 +1,6 @@
 package me.realized.de.arenaregen.zone.task.tasks;
 
+import java.util.logging.Logger;
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.util.BlockUtil;
 import me.realized.de.arenaregen.util.Callback;
@@ -9,10 +10,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-import java.util.logging.Logger;
-
 public class RelightBlocksTask extends Task {
-    
+
     private final Location min, max;
 
     private int x;
