@@ -1,7 +1,7 @@
-name: ArenaRegen
-version: @VERSION@
+name: ArenaRegen-OG
+version: '${version}'
 main: me.realized.de.arenaregen.ArenaRegen
-authors: [Realized]
+authors: [Realized, NotAlexNoyle ]
 description: Create automatically resetting arenas!
-website: https://www.spigotmc.org/resources/duels-extension-arenaregen.59686/
-api-version: 3.4.1
+website: https://github.com/true-og/ArenaRegen-OG
+api-version: 3.4.2

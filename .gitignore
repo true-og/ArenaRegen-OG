@@ -3,3 +3,7 @@
 .idea/
 build/
 out/
+# Eclipse / IDE metadata (ignore anywhere in the repo)
+**/.classpath
+**/.project
+**/.settings/
