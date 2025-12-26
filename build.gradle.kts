@@ -10,7 +10,7 @@ plugins {
 
 allprojects {
     group = "me.realized.de"
-    version = "3.4.2"
+    version = "3.4.1"
 
     repositories {
         mavenLocal()
