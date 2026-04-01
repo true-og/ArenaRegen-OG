@@ -1,5 +1,5 @@
 name: ArenaRegen-OG
-version: '${version}'
+version: '@VERSION@'
 main: me.realized.de.arenaregen.ArenaRegen
 authors: [Realized, NotAlexNoyle ]
 description: Create automatically resetting arenas!
