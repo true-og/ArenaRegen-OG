@@ -1,13 +1,13 @@
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: '[Cool]'' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
 STRINGS:
-  PREFIX: '&9[Duels]'
-  LINE: '&9&m------------------------------------&r'
-  HALF_LINE: '&9&m----------------&r'
+  PREFIX: '&7[&3Duels-OG&f-&4OG&7]'
+  LINE: '&B&m---------------&7[&3Duels-OG&f-&4OG&7]&B---------------&r'
+  HALF_LINE: '&B&m--------------------&r'
 
 ERROR:
   invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid command. Please type ''/%command%'' for help.'
-  no-selection: '{PREFIX} &cYou must select two points with an iron hoe to create a reset zone.'
+  no-selection: '{PREFIX} &cYou must select two points with a &3Stone Axe &cto create a reset zone.'
   cancel-arena-block-break: '{PREFIX} &cCannot destroy the arena.'
   already-exists: '{PREFIX} &cArena ''%name%'' already has a reset zone. To delete, use the command ''/ds ar delete %name%'''
   arena-not-found: '{PREFIX} &c''%name%'' is not an existing arena.'

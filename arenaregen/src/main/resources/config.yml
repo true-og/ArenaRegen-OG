@@ -1,16 +1,16 @@
 # Item to use as a cube selecting tool.
 # default: IRON_HOE
-selecting-tool: IRON_HOE
+selecting-tool: STONE_AXE
 
 experimental:
   # If enabled, the extension will track block changes made by players during the match instead of scanning
   # the entire arena after the match to locate the block changes. While much more efficient, this method
   # is unable to detect block changes caused by other plugins. If you're using such a plugin, avoid this option!
   # default: true
-  track-block-changes: true
+  track-block-changes: false
 
 # Blocks to reset per tick.
-blocks-per-tick: 100
+blocks-per-tick: 40
 
 # Allow breaking blocks in the reset zone that is not placed by a player in match.
 # default: false
@@ -27,11 +27,11 @@ remove-dropped-items: true
 
 # Remove entities in the reset zone when the match ends.
 # default: [ENDER_CRYSTAL, MINECART_TNT]
-remove-entities: [ENDER_CRYSTAL, MINECART_TNT]
+remove-entities: [MINECART_TNT]
 
 # Prevent blocks in the reset zone from burning.
 # default: true
-prevent-block-burn: true
+prevent-block-burn: false
 
 # Prevents blocks in the reset zone from melting. (snow, ice)
 # default: true

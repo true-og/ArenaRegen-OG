@@ -1,9 +1,13 @@
 package me.realized.de.arenaregen.zone;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import me.realized.de.arenaregen.ArenaRegen;
 import me.realized.de.arenaregen.selection.Selection;
 import me.realized.duels.api.Duels;
@@ -13,6 +17,8 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class ZoneManager {
+
+    private static final String BUNDLED_ZONES_PREFIX = "zones/";
 
     private final ArenaRegen extension;
     private final Duels api;
@@ -28,8 +34,11 @@ public class ZoneManager {
         this.folder = new File(extension.getDataFolder(), "zones");
         api.registerListener(new ZoneListener(extension, this));
 
-        if (!folder.exists()) {
-            folder.mkdir();
+        final boolean seed = !folder.exists();
+
+        if (seed) {
+            folder.mkdirs();
+            extractBundledZones();
         }
 
         final File[] files = folder.listFiles();
@@ -109,5 +118,40 @@ public class ZoneManager {
 
     public Collection<Zone> getZones() {
         return zones.values();
+    }
+
+    private void extractBundledZones() {
+        final File jar = extension.getFile();
+
+        if (jar == null || !jar.isFile()) {
+            return;
+        }
+
+        try (final JarFile jarFile = new JarFile(jar)) {
+            final Enumeration<JarEntry> entries = jarFile.entries();
+
+            while (entries.hasMoreElements()) {
+                final JarEntry entry = entries.nextElement();
+                final String entryName = entry.getName();
+
+                if (entry.isDirectory() || !entryName.startsWith(BUNDLED_ZONES_PREFIX) || entryName.length() == BUNDLED_ZONES_PREFIX.length()) {
+                    continue;
+                }
+
+                final String relative = entryName.substring(BUNDLED_ZONES_PREFIX.length());
+
+                if (relative.indexOf('/') >= 0) {
+                    continue;
+                }
+
+                try {
+                    extension.saveResource(entryName);
+                } catch (IllegalArgumentException ex) {
+                    extension.error("Could not extract bundled zone '" + relative + "'!", ex);
+                }
+            }
+        } catch (IOException ex) {
+            extension.error("Could not read bundled zones from extension jar!", ex);
+        }
     }
 }
