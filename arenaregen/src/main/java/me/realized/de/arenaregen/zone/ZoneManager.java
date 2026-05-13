@@ -34,12 +34,11 @@ public class ZoneManager {
         this.folder = new File(extension.getDataFolder(), "zones");
         api.registerListener(new ZoneListener(extension, this));
 
-        final boolean seed = !folder.exists();
-
-        if (seed) {
+        if (!folder.exists()) {
             folder.mkdirs();
-            extractBundledZones();
         }
+
+        extractBundledZones();
 
         final File[] files = folder.listFiles();
 
@@ -141,6 +140,10 @@ public class ZoneManager {
                 final String relative = entryName.substring(BUNDLED_ZONES_PREFIX.length());
 
                 if (relative.indexOf('/') >= 0) {
+                    continue;
+                }
+
+                if (new File(folder, relative).exists()) {
                     continue;
                 }
 
