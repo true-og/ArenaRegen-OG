@@ -7,7 +7,7 @@ experimental:
   # the entire arena after the match to locate the block changes. While much more efficient, this method
   # is unable to detect block changes caused by other plugins. If you're using such a plugin, avoid this option!
   # default: true
-  track-block-changes: false
+  track-block-changes: true
 
 # Blocks to reset per tick.
 blocks-per-tick: 40
