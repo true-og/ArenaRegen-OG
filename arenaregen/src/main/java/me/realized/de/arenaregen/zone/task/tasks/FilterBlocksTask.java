@@ -63,7 +63,7 @@ public class FilterBlocksTask extends Task {
             iterator.remove();
         }
 
-        this.logger.info("Starting to block reset task for zone " + this.zone.getName());
+        this.logger.info("Starting block reset task for zone " + this.zone.getName());
         zone.startSyncTaskTimer(new ResetBlocksTask(logger, extension, zone, onDone, changes));
     }
 }

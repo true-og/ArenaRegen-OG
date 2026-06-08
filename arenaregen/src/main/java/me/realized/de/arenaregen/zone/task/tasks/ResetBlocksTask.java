@@ -51,7 +51,7 @@ public class ResetBlocksTask extends Task {
             return;
         }
 
-        this.logger.info("Starting to block relight task for zone " + this.zone.getName());
+        this.logger.info("Starting block relighting task for zone " + this.zone.getName());
         zone.startSyncTaskTimer(new RelightBlocksTask(logger, extension, zone, onDone));
     }
 }

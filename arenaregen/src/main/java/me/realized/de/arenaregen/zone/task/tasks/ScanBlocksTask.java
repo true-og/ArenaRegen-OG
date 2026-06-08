@@ -57,7 +57,7 @@ public class ScanBlocksTask extends Task {
 
         if (x > max.getBlockX()) {
             cancel();
-            this.logger.info("Starting to block reset task for zone " + this.zone.getName());
+            this.logger.info("Starting block reset task for zone " + this.zone.getName());
             zone.startSyncTaskTimer(new ResetBlocksTask(logger, extension, zone, onDone, changed));
         }
     }
